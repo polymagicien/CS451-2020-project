@@ -1,3 +1,4 @@
 template_java/.settings
 .classpath
 .project
+__pycache__/
