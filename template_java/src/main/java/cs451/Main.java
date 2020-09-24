@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.Scanner;
 
 public class Main {
 
@@ -22,6 +23,15 @@ public class Main {
                 handleSignal();
             }
         });
+    }
+
+    public static void talk(TransportLayer transport) {
+        Scanner scanner = new Scanner(System.in);
+        String data;
+        while ( !(data = scanner.nextLine()).equals("") ) {
+            transport.send("localhost", 11002, data);
+        }
+        scanner.close();
     }
 
     public static void main(String[] args) throws InterruptedException {
@@ -55,7 +65,15 @@ public class Main {
 	System.out.println("Waiting for all processes for finish initialization");
         coordinator.waitOnBarrier();
 
-	System.out.println("Broadcasting messages...");
+    System.out.println("Broadcasting messages...");
+    // Retrieve own port for initialisation
+    int localPort = -1;
+    for ( Host host : parser.hosts()) {
+        if (host.getId() == parser.myId())
+            localPort = host.getPort();
+    }
+    TransportLayer transport = new TransportLayer(localPort);
+    talk(transport);
 
 	System.out.println("Signaling end of broadcasting messages");
         coordinator.finishedBroadcasting();
