@@ -33,15 +33,14 @@ public class TransportLayer {
         String rcvdData = parser.getData();
 
 
-        if (ACK.equals(rcvdData)) {
-            // System.out.println("ACK");
+        if (Constants.ACK.equals(rcvdData)) {
             acknowledged.add(packetId);
         }
         else {
             sendAck(sourceHostname, sourcePort, parser.getSequenceNumber());
             if (!delivered.contains(packetId)) {
                 // System.out.println("DELIVERED");
-                System.out.print("" + parser + "\t");
+                System.out.print("" + parser + "\n");
                 delivered.add(packetId);
             } else {
                 // System.out.println("Already delivered");
@@ -58,7 +57,7 @@ public class TransportLayer {
     }
 
     public void sendAck(String destHostname, int destPort, int sequenceNumber){
-        String rawPayload = sequenceNumber + ";" + ACK;
+        String rawPayload = sequenceNumber + ";" + Constants.ACK;
         groundLayer.send(destHostname, destPort, rawPayload);
     }
 

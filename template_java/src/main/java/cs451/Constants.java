@@ -2,6 +2,9 @@ package cs451;
 
 public class Constants {
 
+    public static final String ACK = "**ACK**";
+    public static final String PING = "**PING**";
+
     public static final int ARG_LIMIT_NO_CONFIG = 10;
     public static final int ARG_LIMIT_CONFIG = 11;
 
