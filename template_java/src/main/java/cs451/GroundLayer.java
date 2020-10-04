@@ -50,7 +50,7 @@ class GroundLayer {
             int senderPort = rcvdPacket.getPort();
             String rcvdPayload = new String(rcvdPacket.getData(), 0, rcvdPacket.getLength());
 
-            transport.receive(senderAddress.getHostName(), senderPort, rcvdPayload);
+            transport.receive(senderAddress.getHostAddress(), senderPort, rcvdPayload);
 
             if ("**STOP**".equals(rcvdPayload)) {
                 receiving = false;

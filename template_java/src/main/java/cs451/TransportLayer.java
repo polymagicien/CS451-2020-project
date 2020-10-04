@@ -26,17 +26,22 @@ public class TransportLayer {
         senderManager = new SenderManager();
     }
 
-    public void receive(String sourceHostname, int sourcePort, String rcvdPayload) {
-        PacketParser parser = new PacketParser(sourceHostname, sourcePort, rcvdPayload);
+    public void receive(String sourceAddress, int sourcePort, String rcvdPayload) {
+        // Check if ping
+        if (rcvdPayload.contains(Constants.PING)) {
+            PingLayer.handlePing(sourceAddress, sourcePort);
+            return;
+        }
+
+
+        PacketParser parser = new PacketParser(sourceAddress, sourcePort, rcvdPayload);
         PacketIdentifier packetId = parser.getPacketId();
         String rcvdData = parser.getData();
-
-
         if (Constants.ACK.equals(rcvdData)) {
             acknowledged.add(packetId);
         }
         else {
-            sendAck(sourceHostname, sourcePort, parser.getSequenceNumber());
+            sendAck(sourceAddress, sourcePort, parser.getSequenceNumber());
             if (!delivered.contains(packetId)) {
                 // System.out.println("DELIVERED");
                 System.out.print("" + parser + "\n");
@@ -47,17 +52,17 @@ public class TransportLayer {
         }
     }
 
-    public void send(String destHostname, int destPort, String payload) {
+    public void send(String destAddress, int destPort, String payload) {
         int sequenceNumber = ++maxSequence;
         String rawPayload = sequenceNumber + ";" + payload;
-        PacketIdentifier packetId = new PacketIdentifier(destHostname, destPort, sequenceNumber);
+        PacketIdentifier packetId = new PacketIdentifier(destAddress, destPort, sequenceNumber);
 
-        senderManager.schedule(destHostname, destPort, rawPayload, packetId);
+        senderManager.schedule(destAddress, destPort, rawPayload, packetId);
     }
 
-    public void sendAck(String destHostname, int destPort, int sequenceNumber){
+    public void sendAck(String destAddress, int destPort, int sequenceNumber){
         String rawPayload = sequenceNumber + ";" + Constants.ACK;
-        GroundLayer.send(destHostname, destPort, rawPayload);
+        GroundLayer.send(destAddress, destPort, rawPayload);
     }
 
     class SenderManager {
@@ -67,7 +72,7 @@ public class TransportLayer {
             this.timer = new Timer();
         }
 
-        public synchronized void schedule(String hostname, int port, String payload, PacketIdentifier packetId) {
+        public synchronized void schedule(String address, int port, String payload, PacketIdentifier packetId) {
             // Define new task
             TimerTask task = new TimerTask() {
                 @Override
@@ -78,7 +83,7 @@ public class TransportLayer {
                     }
                     else{
                         // System.out.println("Sending");
-                        GroundLayer.send(hostname, port, payload);
+                        GroundLayer.send(address, port, payload);
                     }
 				}
 			};

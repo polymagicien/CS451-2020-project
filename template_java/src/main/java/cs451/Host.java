@@ -53,4 +53,18 @@ public class Host {
         return port;
     }
 
+    @Override
+    public int hashCode() {
+        return this.ip.hashCode() + 11*this.port;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null)
+            return false;
+        if(!(o instanceof Host))
+            return false;
+        Host other = (Host)o;
+        return this.ip.equals(other.ip) && this.port == other.port;
+    }
 }

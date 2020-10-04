@@ -12,15 +12,16 @@ public class ApplicationLayer {
         this.port = port;
         this.hosts = hosts;
 
-        this.transport = new TransportLayer(port);
+        transport = new TransportLayer(port);
+        PingLayer.start(hosts);
     }
 
-    public void send(String destHostname, int destPort, String message){
-        transport.send(destHostname, destPort, message);
+    public void send(String destAddress, int destPort, String message){
+        transport.send(destAddress, destPort, message);
     }
 
-    public void receive(String sourceHostname, int sourcePort, String message) {
-        System.out.println(sourceHostname + ":" + sourcePort + "-" + message);
+    public void receive(String sourceAddress, int sourcePort, String message) {
+        System.out.println(sourceAddress + ":" + sourcePort + "-" + message);
     }
     
 }
