@@ -9,10 +9,10 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class PingLayer {
-    static Set<Host> pingReceived = Collections.synchronizedSet(new HashSet<>()); // Updated with ping received in period
-    static HashMap<Host, TimerTask> hostToTask = new HashMap<>(); // Link host to task used to send ping to it
-    static Set<Host> correctProcesses = new HashSet<>(); // Correct Processes 
-    static Timer timer = new Timer();  // Send pings
+    static private Set<Host> pingReceived = Collections.synchronizedSet(new HashSet<>()); // Updated with ping received in period
+    static private HashMap<Host, TimerTask> hostToTask = new HashMap<>(); // Link host to task used to send ping to it
+    static private Set<Host> correctProcesses = new HashSet<>(); // Correct Processes 
+    static private Timer timer = new Timer();  // Send pings
 
     public static void start(List<Host> hosts) {
         // Initialize correctProcesses
@@ -74,6 +74,10 @@ public class PingLayer {
     public static void handleCrash(Host host){
         System.out.println("Crash report : " + host.getIp() + ":" + host.getPort());
         hostToTask.get(host).cancel();  // Stop sending ping to it
+    }
+
+    public static Set<Host> getCorrectProcesses(){
+        return correctProcesses;
     }
     
 }
