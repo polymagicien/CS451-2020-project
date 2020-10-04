@@ -10,7 +10,6 @@ public class TransportLayer {
     static final String ACK = "**ACK**";
     static final int DELAY = 500;
 
-    GroundLayer groundLayer;
     HashSet<PacketIdentifier> delivered;
     Set<PacketIdentifier> acknowledged;
     SenderManager senderManager;
@@ -21,8 +20,8 @@ public class TransportLayer {
         delivered = new HashSet<>();
         acknowledged = Collections.synchronizedSet(new HashSet<PacketIdentifier>()); // Multithread proof
         maxSequence = 0;
-        groundLayer = new GroundLayer(listeningPort);
-        groundLayer.transport = this;
+        GroundLayer.start(listeningPort);
+        GroundLayer.deliverTo(this);
 
         senderManager = new SenderManager();
     }
@@ -58,7 +57,7 @@ public class TransportLayer {
 
     public void sendAck(String destHostname, int destPort, int sequenceNumber){
         String rawPayload = sequenceNumber + ";" + Constants.ACK;
-        groundLayer.send(destHostname, destPort, rawPayload);
+        GroundLayer.send(destHostname, destPort, rawPayload);
     }
 
     class SenderManager {
@@ -79,7 +78,7 @@ public class TransportLayer {
                     }
                     else{
                         // System.out.println("Sending");
-                        groundLayer.send(hostname, port, payload);
+                        GroundLayer.send(hostname, port, payload);
                     }
 				}
 			};

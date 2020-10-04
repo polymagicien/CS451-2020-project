@@ -8,16 +8,16 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 
 class GroundLayer {
-    TransportLayer transport;
-    Thread thread;
+    static TransportLayer transport;
+    static Thread thread;
 
-    private int listeningPort;
-    private boolean receiving = true;
-    private DatagramSocket socket;
-    private byte[] buf = new byte[256];
+    private static int listeningPort;
+    private static boolean receiving = true;
+    private static DatagramSocket socket;
+    private static byte[] buf = new byte[256];
 
-    GroundLayer(int listeningPort) {
-        this.listeningPort = listeningPort;
+    public static void start(int listeningPort) {
+        GroundLayer.listeningPort = listeningPort;
         try {
             socket = new DatagramSocket(listeningPort);
         } catch (SocketException e) {
@@ -32,7 +32,11 @@ class GroundLayer {
         thread.start();
     }
 
-    public void receive() {
+    public static void deliverTo (TransportLayer transport) {
+        GroundLayer.transport = transport;
+    }
+
+    public static void receive() {
         while (receiving) {
             DatagramPacket rcvdPacket = new DatagramPacket(buf, buf.length);
             try {
@@ -55,7 +59,7 @@ class GroundLayer {
         socket.close();
     }
 
-    public void send(String destHost, int destPort, String payload) {
+    public static void send(String destHost, int destPort, String payload) {
         byte[] buf = payload.getBytes();
         InetAddress address;
         try {

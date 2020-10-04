@@ -25,11 +25,11 @@ public class Main {
         });
     }
 
-    public static void talk(TransportLayer transport) {
+    public static void talk(ApplicationLayer appli) {
         Scanner scanner = new Scanner(System.in);
         String data;
         while ( !(data = scanner.nextLine()).equals("") ) {
-            transport.send("localhost", 11002, data);
+            appli.send("localhost", 11002, data);
         }
         scanner.close();
     }
@@ -72,8 +72,8 @@ public class Main {
         if (host.getId() == parser.myId())
             localPort = host.getPort();
     }
-    TransportLayer transport = new TransportLayer(localPort);
-    talk(transport);
+    ApplicationLayer appli = new ApplicationLayer(localPort, parser.hosts());
+    talk(appli);
 
 	System.out.println("Signaling end of broadcasting messages");
         coordinator.finishedBroadcasting();
