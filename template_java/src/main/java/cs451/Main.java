@@ -73,7 +73,8 @@ public class Main {
             localPort = host.getPort();
     }
     HostList.populate(parser.hosts());
-    ApplicationLayer appli = new ApplicationLayer(localPort, parser.hosts());
+    GroundLayer.start(localPort);
+    Layer appli = new BebLayer(parser.hosts());
     talk(appli, parser.hosts().get(0));
 
 	System.out.println("Signaling end of broadcasting messages");

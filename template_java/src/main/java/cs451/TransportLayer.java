@@ -15,11 +15,10 @@ public class TransportLayer implements Layer {
 
     int maxSequence;
 
-    TransportLayer(int listeningPort) {
+    TransportLayer() {
         delivered = new HashSet<>();
         acknowledged = Collections.synchronizedSet(new HashSet<PacketIdentifier>()); // Multi-thread proof
         maxSequence = 0;
-        GroundLayer.start(listeningPort);
         GroundLayer.deliverTo(this);
 
         senderManager = new SenderManager();

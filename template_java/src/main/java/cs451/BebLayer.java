@@ -2,14 +2,13 @@ package cs451;
 
 import java.util.List;
 
-public class ApplicationLayer implements Layer {
+public class BebLayer implements Layer {
     int port;
     Layer transport;
 
-    public ApplicationLayer(int port, List<Host> hosts){
-        this.port = port;
+    public BebLayer(List<Host> hosts){
 
-        transport = new TransportLayer(port);
+        transport = new TransportLayer();
         transport.deliverTo(this);
         PingLayer.start(hosts);
     }
