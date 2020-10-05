@@ -12,11 +12,13 @@ public class PingLayer {
     static private Set<Host> pingReceived = Collections.synchronizedSet(new HashSet<>()); // Updated with ping received in period
     static private HashMap<Host, TimerTask> hostToTask = new HashMap<>(); // Link host to task used to send ping to it
     static private Set<Host> correctProcesses = new HashSet<>(); // Correct Processes 
+    static private Set<Host> declaredProcesses = new HashSet<>();
     static private Timer timer = new Timer();  // Send pings
 
     public static void start(List<Host> hosts) {
         // Initialize correctProcesses
         correctProcesses.addAll(hosts);
+        declaredProcesses.addAll(hosts);
 
         for (Host host : hosts)
             System.out.println(host.getIp() + ":" + host.getPort());
@@ -26,7 +28,7 @@ public class PingLayer {
             TimerTask task = new TimerTask() {
                 @Override
                 public void run() {
-                    GroundLayer.send(host.getIp(), host.getPort(), Constants.PING);
+                    GroundLayer.send(host, Constants.PING);
                 }
             };
             timer.scheduleAtFixedRate(task, 0, Constants.DELAY_PING);
@@ -78,6 +80,14 @@ public class PingLayer {
 
     public static Set<Host> getCorrectProcesses(){
         return correctProcesses;
+    }
+
+    public static Host getHost(String ipString, int port){
+        for(Host host : declaredProcesses) {
+            if (host.getIp().equals(ipString) && host.getPort() == port)
+                return host;
+        }
+        return null;
     }
     
 }

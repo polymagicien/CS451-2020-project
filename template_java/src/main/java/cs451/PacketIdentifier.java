@@ -1,19 +1,21 @@
 package cs451;
 
 public class PacketIdentifier {
-    private String hostname;
-    private int port; 
+    private Host host; 
     private int sequenceNumber;
 
-    public PacketIdentifier(String hostname, int port, int sequenceNumber) {
-        this.hostname = hostname;
-        this.port = port;
+    public PacketIdentifier(Host host, int sequenceNumber) {
+        this.host = host;
         this.sequenceNumber = sequenceNumber;
+    }
+
+    public Host getDest() {
+        return this.host;
     }
 
     @Override
     public String toString() {
-        return "" + hostname + ":" + port + ":" + sequenceNumber;
+        return "" + host + "(" + sequenceNumber + ")";
     }
 
     @Override
@@ -23,11 +25,11 @@ public class PacketIdentifier {
         if(!(o instanceof PacketIdentifier))
             return false;
         PacketIdentifier other = (PacketIdentifier)o;
-        return this.hostname.equals(other.hostname) && this.port == other.port && this.sequenceNumber == other.sequenceNumber;
+        return this.host.equals(other.host) && this.sequenceNumber == other.sequenceNumber;
     }
 
     @Override
     public int hashCode() {
-        return hostname.hashCode() + port + sequenceNumber;
+        return host.getIp().hashCode() + host.getPort() + sequenceNumber;
     }
 }

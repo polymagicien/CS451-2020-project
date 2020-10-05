@@ -8,7 +8,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 
 class GroundLayer {
-    static TransportLayer transport;
+    static Layer transport;
     static Thread thread;
 
     private static int listeningPort;
@@ -27,16 +27,20 @@ class GroundLayer {
 
         // Start listening thread
         thread = new Thread(() -> {
-            receive();
+            listen();
         });
         thread.start();
     }
 
-    public static void deliverTo (TransportLayer transport) {
+    public static void deliverTo(Layer transport) {
         GroundLayer.transport = transport;
     }
 
-    public static void receive() {
+    public static void receive(Host source, String message) {
+        System.err.println("Incorrect use of GroundLayer");
+    }
+
+    public static void listen() {
         while (receiving) {
             DatagramPacket rcvdPacket = new DatagramPacket(buf, buf.length);
             try {
@@ -50,7 +54,9 @@ class GroundLayer {
             int senderPort = rcvdPacket.getPort();
             String rcvdPayload = new String(rcvdPacket.getData(), 0, rcvdPacket.getLength());
 
-            transport.receive(senderAddress.getHostAddress(), senderPort, rcvdPayload);
+            String ipAddress = senderAddress.getHostAddress();
+            Host senderHost = HostList.getHost(ipAddress, senderPort);
+            transport.receive(senderHost, rcvdPayload);
 
             if ("**STOP**".equals(rcvdPayload)) {
                 receiving = false;
@@ -59,7 +65,9 @@ class GroundLayer {
         socket.close();
     }
 
-    public static void send(String destHost, int destPort, String payload) {
+    public static void send(Host host, String payload) {
+        String destHost = host.getIp();
+        int destPort = host.getPort();
         byte[] buf = payload.getBytes();
         InetAddress address;
         try {
@@ -75,6 +83,9 @@ class GroundLayer {
             System.out.println("Unknown destination hostname");
             e1.printStackTrace();
         }
+    }
+
+    public void handleCrash(Host crashedHost) {
     }
     
 }

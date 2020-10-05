@@ -2,30 +2,34 @@ package cs451;
 
 import java.util.List;
 
-public class ApplicationLayer {
+public class ApplicationLayer implements Layer {
     int port;
-
-    TransportLayer transport;
+    Layer transport;
 
     public ApplicationLayer(int port, List<Host> hosts){
         this.port = port;
 
         transport = new TransportLayer(port);
+        transport.deliverTo(this);
         PingLayer.start(hosts);
     }
 
-    public void broadcast(String message) {
+    public void send(Host destHost, String message){
         for (Host host : PingLayer.getCorrectProcesses()) {
-            transport.send(host.getIp(), host.getPort(), message);
+            transport.send(host, message);
         }
     }
 
-    public void send(String destAddress, int destPort, String message){
-        transport.send(destAddress, destPort, message);
+    public void receive(Host host, String message) {
+        System.out.println("Application : " + host + "-" + message);
     }
 
-    public void receive(String sourceAddress, int sourcePort, String message) {
-        System.out.println(sourceAddress + ":" + sourcePort + "-" + message);
+    public void deliverTo(Layer layer) {
+        System.err.println("Incorrect use of Application layer");
+    }
+
+    public void handleCrash(Host crashedHost) {
+        transport.handleCrash(crashedHost);
     }
     
 }

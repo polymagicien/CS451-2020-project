@@ -59,6 +59,11 @@ public class Host {
     }
 
     @Override
+    public String toString() {
+        return "" + this.id + ":" + this.ip + ":" + this.port;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (o == null)
             return false;

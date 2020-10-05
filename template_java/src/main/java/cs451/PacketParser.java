@@ -1,16 +1,14 @@
 package cs451;
 
 public class PacketParser {
-    private String hostname;
-    private int port;
+    private Host host;
     private String rawPayload;
 
     private int sequenceNumber;
     private String data;
 
-    public PacketParser(String hostname, int port, String payload) {
-        this.hostname = hostname;
-        this.port = port;
+    public PacketParser(Host host, String payload) {
+        this.host = host;
         this.rawPayload = payload;
         if (!payload.contains(";")){
             System.out.println("Wrong packet format");
@@ -26,15 +24,7 @@ public class PacketParser {
 
     @Override
     public String toString(){
-        return hostname + ":" + port + " - " + rawPayload ;
-    }
-
-    public String getHostname() {
-        return hostname;
-    }
-
-    public int getPort() {
-        return port;
+        return   "" + host + " - " + rawPayload ;
     }
 
     public String getData() {
@@ -50,6 +40,6 @@ public class PacketParser {
     }
 
     public PacketIdentifier getPacketId() {
-        return new PacketIdentifier(hostname, port, sequenceNumber);
+        return new PacketIdentifier(host, sequenceNumber);
     }
 }
