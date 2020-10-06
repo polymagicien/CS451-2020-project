@@ -15,6 +15,8 @@ public class PingLayer {
     static private Set<Host> declaredProcesses = Collections.synchronizedSet(new HashSet<>());
     static private Timer timer = new Timer();  // Send pings
 
+    static Layer notifiedLayer = null;
+
     public static void start(List<Host> hosts) {
         // Initialize correctProcesses
         correctProcesses.addAll(hosts);
@@ -40,6 +42,10 @@ public class PingLayer {
             checkForCrash();
         });
         thread.start();
+    }
+
+    public static void setNotifiedLayer(Layer layer){
+        notifiedLayer = layer;
     }
 
     public static void checkForCrash() {
@@ -76,6 +82,9 @@ public class PingLayer {
     public static void handleCrash(Host host){
         System.out.println("Crash report : " + host.getIp() + ":" + host.getPort());
         hostToTask.get(host).cancel();  // Stop sending ping to it
+
+        if (notifiedLayer != null)
+            notifiedLayer.handleCrash(host);
     }
 
     public static Set<Host> getCorrectProcesses(){
