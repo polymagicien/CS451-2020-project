@@ -58,18 +58,18 @@ public class PingLayer {
             // System.out.println("Rain Check");
 
             Set<Host> crashedProcesses = new HashSet<>();
-            crashedProcesses.addAll(correctProcesses);
-            crashedProcesses.removeAll(pingReceived);
-
-            // System.out.println(crashedProcesses.size());
+            synchronized(correctProcesses){
+                crashedProcesses.addAll(correctProcesses);
+                crashedProcesses.removeAll(pingReceived);
+                correctProcesses.removeAll(crashedProcesses);
+            }
+;
             for (Host host : crashedProcesses) 
                 handleCrash(host);
 
-            correctProcesses.removeAll(crashedProcesses);
             pingReceived.clear();
         }
     }
-
 
     public static void handlePing(String sourceHostname, int sourcePort){
         Host host = new Host();
@@ -89,14 +89,6 @@ public class PingLayer {
 
     public static Set<Host> getCorrectProcesses(){
         return correctProcesses;
-    }
-
-    public static Host getHost(String ipString, int port){
-        for(Host host : declaredProcesses) {
-            if (host.getIp().equals(ipString) && host.getPort() == port)
-                return host;
-        }
-        return null;
     }
     
 }

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class UrbLayer implements Layer {
@@ -13,7 +14,7 @@ public class UrbLayer implements Layer {
     Layer upperLayer = null;
     Set<BroadcastMessage> forward;
     Set<BroadcastMessage> delivered;
-    HashMap<BroadcastMessage, LinkedList<Host>> acked;
+    Map<BroadcastMessage, LinkedList<Host>> acked;
 
     Host me;
 
@@ -21,12 +22,10 @@ public class UrbLayer implements Layer {
         this.me = me;
         this.forward = Collections.synchronizedSet(new HashSet<>());
         this.delivered = Collections.synchronizedSet(new HashSet<>());
-        this.acked = new HashMap<>();
+        this.acked = Collections.synchronizedMap(new HashMap<>());
         
         this.bebLayer = new BebLayer(hosts);
         this.bebLayer.deliverTo(this);
-
-
     }
     
     public void send(Host useless, String message) {
@@ -64,10 +63,11 @@ public class UrbLayer implements Layer {
         //     System.out.print(host.getId() + "  ");
         // }
         // System.out.println("\n-----------------------------");
-
-        if (!delivered.contains(broadcastMessage) && acked.get(broadcastMessage).containsAll(PingLayer.getCorrectProcesses()) ) {
-            delivered.add(broadcastMessage);
-            deliver(broadcastMessage.getHost(), broadcastMessage.getMessage());
+        synchronized(acked) {
+            if (!delivered.contains(broadcastMessage) && acked.get(broadcastMessage).containsAll(PingLayer.getCorrectProcesses()) ) {
+                delivered.add(broadcastMessage);
+                deliver(broadcastMessage.getHost(), broadcastMessage.getMessage());
+            }
         }
     }
 

@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Set;
 
 public class BebLayer implements Layer {
-    int port;
     Layer transport;
     Layer upperLayer = null;
 
