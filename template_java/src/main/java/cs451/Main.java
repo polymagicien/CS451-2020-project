@@ -1,5 +1,7 @@
 package cs451;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -75,6 +77,21 @@ public class Main {
     HostList.populate(parser.hosts());
     GroundLayer.start(me.getPort());
     Layer appli = new ApplicationLayer(parser.hosts(), me);
+
+    if (parser.myId() == 1){
+        BufferedReader reader;
+		try {
+			reader = new BufferedReader(new FileReader("sent.txt"));
+			String line = reader.readLine();
+			while (line != null) {
+				appli.send(null, line);
+				line = reader.readLine();
+			}
+			reader.close();
+		} catch (IOException e) {
+            System.err.println("Unable to open file");
+		}
+    }
     talk(appli, parser.hosts().get(0));
 
 	System.out.println("Signaling end of broadcasting messages");
