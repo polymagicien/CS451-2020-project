@@ -2,11 +2,12 @@ package cs451;
 
 public class Constants {
 
+    public static final int numThreadGroundLayer = 2;
     public static final String ACK = "**ACK**";
     public static final String PING = "**PING**";
     public static final int DELAY_RETRANSMIT = 100; // ms
     public static final int DELAY_PING = 100; // ms
-	public static final int DELAY_FOR_CRASH = 2000; // ms
+	public static final int DELAY_FOR_CRASH = 3000; // ms
 
     public static final int ARG_LIMIT_NO_CONFIG = 10;
     public static final int ARG_LIMIT_CONFIG = 11;

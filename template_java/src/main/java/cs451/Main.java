@@ -64,42 +64,42 @@ public class Main {
 
         Coordinator coordinator = new Coordinator(parser.myId(), parser.barrierIp(), parser.barrierPort(), parser.signalIp(), parser.signalPort());
 
-	System.out.println("Waiting for all processes for finish initialization");
-        coordinator.waitOnBarrier();
+        System.out.println("Waiting for all processes for finish initialization");
+            coordinator.waitOnBarrier();
 
-    System.out.println("Broadcasting messages...");
-    // Retrieve own port for initialisation
-    Host me = null;
-    for ( Host host : parser.hosts()) {
-        if (host.getId() == parser.myId())
-            me = host;
-    }
-    HostList.populate(parser.hosts());
-    GroundLayer.start(me.getPort());
-    Layer appli = new ApplicationLayer(parser.hosts(), me);
+        System.out.println("Broadcasting messages...");
+        // Retrieve own port for initialisation
+        Host me = null;
+        for ( Host host : parser.hosts()) {
+            if (host.getId() == parser.myId())
+                me = host;
+        }
+        HostList.populate(parser.hosts());
+        GroundLayer.start(me.getPort());
+        Layer appli = new ApplicationLayer(parser.hosts(), me);
 
-    if (parser.myId() == 1){
-        BufferedReader reader;
-		try {
-			reader = new BufferedReader(new FileReader("sent.txt"));
-			String line = reader.readLine();
-			while (line != null) {
-				appli.send(null, line);
-				line = reader.readLine();
-			}
-			reader.close();
-		} catch (IOException e) {
-            System.err.println("Unable to open file");
-		}
-    }
-    talk(appli, parser.hosts().get(0));
+        if (parser.myId() == 1){
+            BufferedReader reader;
+            try {
+                reader = new BufferedReader(new FileReader("sent.txt"));
+                String line = reader.readLine();
+                while (line != null) {
+                    appli.send(null, line);
+                    line = reader.readLine();
+                }
+                reader.close();
+            } catch (IOException e) {
+                System.err.println("Unable to open file");
+            }
+        }
+        talk(appli, parser.hosts().get(0));
 
-	System.out.println("Signaling end of broadcasting messages");
-        coordinator.finishedBroadcasting();
+        System.out.println("Signaling end of broadcasting messages");
+            coordinator.finishedBroadcasting();
 
-	while (true) {
-	    // Sleep for 1 hour
-	    Thread.sleep(60 * 60 * 1000);
-	}
+        while (true) {
+            // Sleep for 1 hour
+            Thread.sleep(60 * 60 * 1000);
+        }
     }
 }

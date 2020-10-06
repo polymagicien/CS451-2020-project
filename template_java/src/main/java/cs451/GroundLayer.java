@@ -6,15 +6,20 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.LinkedList;
 
 class GroundLayer {
-    static Layer transport = null;
-    static Thread thread;
+    private static Layer transport = null;
+    private static Thread thread;
 
     private static int listeningPort;
     private static boolean receiving = true;
     private static DatagramSocket socket;
     private static byte[] buf = new byte[256];
+
+    private static SynchronizedLinkedList<BroadcastMessage> receivedMessages;
+    private static LinkedList<Thread> threadPool;
+
 
     public static void start(int listeningPort) {
         GroundLayer.listeningPort = listeningPort;
@@ -30,6 +35,19 @@ class GroundLayer {
             listen();
         });
         thread.start();
+
+        threadPool = new LinkedList<>();
+        receivedMessages = new SynchronizedLinkedList<>();
+        for (int i = 0; i < Constants.numThreadGroundLayer; i++) {
+            Thread t = new Thread(() -> {
+                while(true){
+                    BroadcastMessage m = receivedMessages.removeFirst();
+                    transport.receive(m.getHost(), m.getMessage());
+                }
+            });
+            threadPool.add(t);
+            t.start();
+        }
     }
 
     public static void deliverTo(Layer transport) {
@@ -56,7 +74,8 @@ class GroundLayer {
 
             String ipAddress = senderAddress.getHostAddress();
             Host senderHost = HostList.getHost(ipAddress, senderPort);
-            transport.receive(senderHost, rcvdPayload);
+            receivedMessages.add(new BroadcastMessage(senderHost, rcvdPayload));
+            // transport.receive(senderHost, rcvdPayload);
 
             if ("**STOP**".equals(rcvdPayload)) {
                 receiving = false;

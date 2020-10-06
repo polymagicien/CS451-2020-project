@@ -3,6 +3,7 @@ package cs451;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -80,14 +81,14 @@ public class TransportLayer implements Layer {
 
     class SenderManager {
         private Timer timer;
-        private HashMap<PacketIdentifier, TimerTask> idToTask;
+        private HashMap<Host, LinkedList<TimerTask>> hostToTasks;
         
         public SenderManager() {
             this.timer = new Timer();
-            this.idToTask = new HashMap<>();
+            this.hostToTasks = new HashMap<>();
         }
 
-        public synchronized void schedule(Host desHost, String payload, PacketIdentifier packetId) {
+        public synchronized void schedule(Host destHost, String payload, PacketIdentifier packetId) {
             // Define new task
             TimerTask task = new TimerTask() {
                 @Override
@@ -97,20 +98,25 @@ public class TransportLayer implements Layer {
                     }
                     else{
                         // System.out.println("Sending");
-                        GroundLayer.send(desHost, payload);
+                        GroundLayer.send(destHost, payload);
                     }
 				}
             };
-            this.idToTask.put(packetId, task);
+
+            if(!this.hostToTasks.keySet().contains(destHost)) {
+                this.hostToTasks.put(destHost, new LinkedList<TimerTask>());
+            }
+            this.hostToTasks.get(destHost).add(task);
+
 			this.timer.scheduleAtFixedRate(task, 0, Constants.DELAY_RETRANSMIT);
         }
         
         public synchronized void cancelMessageTo(Host host){
-            for (PacketIdentifier packetId : idToTask.keySet()){
-                if (packetId.getDest().equals(host)){
-                    idToTask.get(packetId).cancel();
-                }
+            for (TimerTask task : hostToTasks.get(host)){
+                if (task != null)
+                    task.cancel();
             }
+            hostToTasks.get(host).clear();
         }
 	}
 }

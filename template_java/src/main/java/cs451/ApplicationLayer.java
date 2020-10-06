@@ -4,6 +4,7 @@ import java.util.List;
 
 public class ApplicationLayer implements Layer {
     Layer lowerLayer;
+    Integer counter = 0;
 
     public ApplicationLayer(List<Host> hosts, Host me) {
         lowerLayer = new UrbLayer(hosts, me);
@@ -17,7 +18,10 @@ public class ApplicationLayer implements Layer {
     }
 
     public void receive(Host host, String message) {
-        System.out.println("APPLI : " + host + " - " + message);
+        synchronized(counter){
+            System.out.println("Received " + ++counter);
+        }
+        // System.out.println("APPLI : " + host + " - " + message);
     }
 
     public void deliverTo(Layer layer) {

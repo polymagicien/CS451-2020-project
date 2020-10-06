@@ -80,7 +80,7 @@ public class PingLayer {
     }
 
     public static void handleCrash(Host host){
-        System.out.println("Crash report : " + host.getIp() + ":" + host.getPort());
+        System.out.println("Crash report : " + host);
         hostToTask.get(host).cancel();  // Stop sending ping to it
 
         if (notifiedLayer != null)
