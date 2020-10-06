@@ -13,7 +13,7 @@ public class BebLayer implements Layer {
         PingLayer.start(hosts);
     }
 
-    public void send(Host destHost, String message){
+    public void send(Host useless, String message){
         for (Host host : PingLayer.getCorrectProcesses()) {
             transport.send(host, message);
         }

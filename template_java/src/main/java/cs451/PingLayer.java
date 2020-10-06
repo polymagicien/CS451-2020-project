@@ -11,8 +11,8 @@ import java.util.TimerTask;
 public class PingLayer {
     static private Set<Host> pingReceived = Collections.synchronizedSet(new HashSet<>()); // Updated with ping received in period
     static private HashMap<Host, TimerTask> hostToTask = new HashMap<>(); // Link host to task used to send ping to it
-    static private Set<Host> correctProcesses = new HashSet<>(); // Correct Processes 
-    static private Set<Host> declaredProcesses = new HashSet<>();
+    static private Set<Host> correctProcesses = Collections.synchronizedSet(new HashSet<>()); // Correct Processes 
+    static private Set<Host> declaredProcesses = Collections.synchronizedSet(new HashSet<>());
     static private Timer timer = new Timer();  // Send pings
 
     public static void start(List<Host> hosts) {

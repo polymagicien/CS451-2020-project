@@ -8,7 +8,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class TransportLayer implements Layer {
-    HashSet<PacketIdentifier> delivered;
+    Set<PacketIdentifier> delivered;
     Set<PacketIdentifier> acknowledged;
     SenderManager senderManager;
     Layer upperLayer;
@@ -16,7 +16,7 @@ public class TransportLayer implements Layer {
     int maxSequence;
 
     TransportLayer() {
-        delivered = new HashSet<>();
+        delivered = Collections.synchronizedSet(new HashSet<>());
         acknowledged = Collections.synchronizedSet(new HashSet<PacketIdentifier>()); // Multi-thread proof
         maxSequence = 0;
         GroundLayer.deliverTo(this);

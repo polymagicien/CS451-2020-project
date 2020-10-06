@@ -11,7 +11,7 @@ public class Host {
     private String ip;
     private int port = -1;
 
-    public boolean populate(String idString, String ipString, String portString) {
+    public synchronized boolean populate(String idString, String ipString, String portString) {
         try {
             id = Integer.parseInt(idString);
 
@@ -41,15 +41,15 @@ public class Host {
         return true;
     }
 
-    public int getId() {
+    public synchronized int getId() {
         return id;
     }
 
-    public String getIp() {
+    public synchronized String getIp() {
         return ip;
     }
 
-    public int getPort() {
+    public synchronized int getPort() {
         return port;
     }
 
@@ -59,7 +59,7 @@ public class Host {
     }
 
     @Override
-    public String toString() {
+    public synchronized String toString() {
         return "" + this.id + ":" + this.ip + ":" + this.port;
     }
 
