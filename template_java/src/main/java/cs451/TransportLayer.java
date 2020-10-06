@@ -11,7 +11,7 @@ public class TransportLayer implements Layer {
     Set<PacketIdentifier> delivered;
     Set<PacketIdentifier> acknowledged;
     SenderManager senderManager;
-    Layer upperLayer;
+    Layer upperLayer = null;
 
     int maxSequence;
 
@@ -47,11 +47,13 @@ public class TransportLayer implements Layer {
             if (!delivered.contains(packetId)) {
                 // System.out.println("DELIVERED");
                 delivered.add(packetId);
-                if (upperLayer != null)
+                if (upperLayer != null){
+                    // System.out.print("Transport : " + parser + "\n");
                     upperLayer.receive(sourceHost, rcvdData);
-                else
+                }
+                else{
                     System.out.print("Transport : " + parser + "\n");
-
+                }
             } else {
                 // System.out.println("Already delivered");
             }

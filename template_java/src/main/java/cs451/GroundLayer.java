@@ -8,7 +8,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 
 class GroundLayer {
-    static Layer transport;
+    static Layer transport = null;
     static Thread thread;
 
     private static int listeningPort;

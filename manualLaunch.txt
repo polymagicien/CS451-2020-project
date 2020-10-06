@@ -8,7 +8,9 @@
 ./barrier.py --processes 3
 
 tc qdisc add dev lo root netem 2>/dev/null
-tc qdisc change dev lo root netem delay 20ms 10ms loss 10% 25% reorder 25% 50%
+tc qdisc change dev lo root netem delay 10ms 3ms loss 5% 25% reorder 25% 50%
+tc qdisc change dev lo root netem delay 200ms loss 2%
 
-ip netns exec netBroadcast bash
+ip netns add test
+ip netns exec test bash
 ip link set lo up

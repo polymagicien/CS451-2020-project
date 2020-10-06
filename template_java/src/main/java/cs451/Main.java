@@ -67,14 +67,14 @@ public class Main {
 
     System.out.println("Broadcasting messages...");
     // Retrieve own port for initialisation
-    int localPort = -1;
+    Host me = null;
     for ( Host host : parser.hosts()) {
         if (host.getId() == parser.myId())
-            localPort = host.getPort();
+            me = host;
     }
     HostList.populate(parser.hosts());
-    GroundLayer.start(localPort);
-    Layer appli = new BebLayer(parser.hosts());
+    GroundLayer.start(me.getPort());
+    Layer appli = new ApplicationLayer(parser.hosts(), me);
     talk(appli, parser.hosts().get(0));
 
 	System.out.println("Signaling end of broadcasting messages");

@@ -1,10 +1,12 @@
 package cs451;
 
 import java.util.List;
+import java.util.Set;
 
 public class BebLayer implements Layer {
     int port;
     Layer transport;
+    Layer upperLayer = null;
 
     public BebLayer(List<Host> hosts){
 
@@ -14,17 +16,26 @@ public class BebLayer implements Layer {
     }
 
     public void send(Host useless, String message){
-        for (Host host : PingLayer.getCorrectProcesses()) {
-            transport.send(host, message);
+        Set<Host> correctProcesses = PingLayer.getCorrectProcesses();
+        synchronized (correctProcesses) {
+            for(Host host : correctProcesses){
+                transport.send(host, message);
+            }
         }
     }
 
     public void receive(Host host, String message) {
-        System.out.println("Application : " + host + "-" + message);
+        if (upperLayer != null) {
+            // System.out.println("Beb : " + host + " - " + message);
+            upperLayer.receive(host, message);
+        }
+        else {
+            System.out.println("Beb : " + host + " - " + message);
+        }
     }
 
     public void deliverTo(Layer layer) {
-        System.err.println("Incorrect use of Application layer");
+        this.upperLayer = layer;
     }
 
     public void handleCrash(Host crashedHost) {

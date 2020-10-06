@@ -24,14 +24,14 @@ public class BroadcastMessage {
 
     @Override
     public String toString() {
-        return "" + this.host + "-" + this.message;
+        return "" + this.host + " - " + this.message;
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == null)
             return false;
-        if(!(o instanceof Host))
+        if(!(o instanceof BroadcastMessage))
             return false;
         BroadcastMessage other = (BroadcastMessage)o;
         return this.host.equals(other.host) && this.message.equals(other.message);
