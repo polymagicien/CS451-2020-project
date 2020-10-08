@@ -16,25 +16,33 @@ public class PingLayer {
     static private Timer timer = new Timer();  // Send pings
 
     static Layer notifiedLayer = null;
+    static Host me;
 
-    public static void start(List<Host> hosts) {
+    public static void start(List<Host> hosts, Host me) {
         // Initialize correctProcesses
         correctProcesses.addAll(hosts);
         declaredProcesses.addAll(hosts);
+        PingLayer.me = me;
 
         for (Host host : hosts)
             System.out.println(host.getIp() + ":" + host.getPort());
 
         // Schedule ping sending
-        for (Host host : correctProcesses) {
-            TimerTask task = new TimerTask() {
-                @Override
-                public void run() {
-                    GroundLayer.send(host, Constants.PING);
+        synchronized(correctProcesses){
+            for (Host host : correctProcesses) {
+                if (host.equals(me)){  // Do not send ping to itself
+                    continue;
                 }
-            };
-            timer.scheduleAtFixedRate(task, 0, Constants.DELAY_PING);
-            hostToTask.put(host, task);
+
+                TimerTask task = new TimerTask() {
+                    @Override
+                    public void run() {
+                        GroundLayer.send(host, Constants.PING);
+                    }
+                };
+                timer.scheduleAtFixedRate(task, 0, Constants.DELAY_PING);
+                hostToTask.put(host, task);
+            }
         }
 
 
@@ -61,6 +69,7 @@ public class PingLayer {
             synchronized(correctProcesses){
                 crashedProcesses.addAll(correctProcesses);
                 crashedProcesses.removeAll(pingReceived);
+                crashedProcesses.remove(me);
                 correctProcesses.removeAll(crashedProcesses);
             }
 ;

@@ -11,13 +11,14 @@ public class BebLayer implements Layer {
 
         transport = new TransportLayer();
         transport.deliverTo(this);
-        PingLayer.start(hosts);
     }
 
-    public void send(Host useless, String message){
+    public void send(Host doNotSendTo, String message){
         Set<Host> correctProcesses = PingLayer.getCorrectProcesses();
         synchronized (correctProcesses) {
             for(Host host : correctProcesses){
+                if (host.equals(doNotSendTo))
+                    continue;
                 transport.send(host, message);
             }
         }
