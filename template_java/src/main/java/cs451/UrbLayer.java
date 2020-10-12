@@ -34,52 +34,59 @@ public class UrbLayer implements Layer {
         this.bebLayer.deliverTo(this);
         PingLayer.start(hosts, me);
 
-        Thread t = new Thread(() -> {
-            while (true) {
-                // synchronized(messagesInBroadcast){
-                    // while (messagesInBroadcast >= Constants.MAX_SIMULTANEOUS_BROADCAST) {
-                    //     try {
-                    //         wait();
-                    //     } catch (InterruptedException e) {
-                    //         e.printStackTrace();
-                    //     }
-                    // }
-                    // messagesInBroadcast++;
+        // Thread t = new Thread(() -> {
+        //     while (true) {
+        //         // synchronized(messagesInBroadcast){
+        //             // while (messagesInBroadcast >= Constants.MAX_SIMULTANEOUS_BROADCAST) {
+        //             //     try {
+        //             //         wait();
+        //             //     } catch (InterruptedException e) {
+        //             //         e.printStackTrace();
+        //             //     }
+        //             // }
+        //             // messagesInBroadcast++;
                 
 
-                String message = messagesToBroadcast.removeFirst();
-                BroadcastMessage broadcastMessage = new BroadcastMessage(me, message);
+        //         String message = messagesToBroadcast.removeFirst();
+        //         BroadcastMessage broadcastMessage = new BroadcastMessage(me, message);
 
-                if (!acked.containsKey(broadcastMessage)){
-                    acked.put(broadcastMessage, new LinkedList<Host>());
-                }
-                acked.get(broadcastMessage).add(me);
-                forward.add(broadcastMessage);
+        //         if (!acked.containsKey(broadcastMessage)){
+        //             acked.put(broadcastMessage, new LinkedList<Host>());
+        //         }
+        //         acked.get(broadcastMessage).add(me);
+        //         forward.add(broadcastMessage);
 
-                String formattedMessage = me.getId() + ";" + message;
-                bebLayer.send(me, formattedMessage);
-            }
-        });
-        t.start();
+        //         String formattedMessage = me.getId() + ";" + message;
+        //         bebLayer.send(me, formattedMessage);
+        //     }
+        // });
+        // t.start();
     }
     
-    public void send(Host useless, String message) {
-        messagesToBroadcast.add(message);
+    public synchronized void send(Host useless, String message) {
+        BroadcastMessage broadcastMessage = new BroadcastMessage(me, message);
+
+        if (!acked.containsKey(broadcastMessage)){
+            acked.put(broadcastMessage, new LinkedList<Host>());
+        }
+        acked.get(broadcastMessage).add(me);
+        forward.add(broadcastMessage);
+
+        String formattedMessage = me.getId() + ";" + message;
+        bebLayer.send(me, formattedMessage);
     }
 
-    public void receive(Host immediateSender, String formattedMessage) {
+    public synchronized void receive(Host immediateSender, String formattedMessage) {
         // Formating
         int originalSenderId = Integer.valueOf(formattedMessage.split(";", 2)[0]);
         Host originalSender = HostList.getHost(originalSenderId);
         String message = formattedMessage.split(";", 2)[1];
         BroadcastMessage broadcastMessage = new BroadcastMessage(originalSender, message);
 
-        synchronized(acked) {
-            if (!acked.containsKey(broadcastMessage)){
-                acked.put(broadcastMessage, new LinkedList<Host>());
-            }
-            acked.get(broadcastMessage).add(immediateSender);
+        if (!acked.containsKey(broadcastMessage)){
+            acked.put(broadcastMessage, new LinkedList<Host>());
         }
+        acked.get(broadcastMessage).add(immediateSender);
         if(!forward.contains(broadcastMessage)) {
             forward.add(broadcastMessage);
             bebLayer.send(null, formattedMessage);
@@ -88,41 +95,31 @@ public class UrbLayer implements Layer {
         checkForDelivery(broadcastMessage);
     }
 
-    public void checkForDelivery() {
+    public synchronized void checkForDelivery() {
         for (BroadcastMessage broadcastMessage : forward) {
-            synchronized(acked) {
-                Set<Host> correctProcesses = PingLayer.getCorrectProcesses();
-
-                synchronized(correctProcesses){
-                    if (!delivered.contains(broadcastMessage) && acked.get(broadcastMessage).containsAll(correctProcesses) ) {
-                        delivered.add(broadcastMessage);
-                        deliver(broadcastMessage.getHost(), broadcastMessage.getMessage());
-                    }
-                }
+            Set<Host> correctProcesses = PingLayer.getCorrectProcesses();
+            if (!delivered.contains(broadcastMessage) && acked.get(broadcastMessage).containsAll(correctProcesses) ) {
+                delivered.add(broadcastMessage);
+                deliver(broadcastMessage.getHost(), broadcastMessage.getMessage());
             }
         }
     }
 
-    public void checkForDelivery(BroadcastMessage broadcastMessage) {
+    public synchronized void checkForDelivery(BroadcastMessage broadcastMessage) {
         // System.out.println("-----------------------------");
         // System.out.println("Received : " + broadcastMessage);
         // for(Host host : acked.get(broadcastMessage)){
         //     System.out.print(host.getId() + "  ");
         // }
         // System.out.println("\n-----------------------------");
-        synchronized(acked) {
             Set<Host> correctProcesses = PingLayer.getCorrectProcesses();
-
-            synchronized(correctProcesses){
-                if (!delivered.contains(broadcastMessage) && acked.get(broadcastMessage).containsAll(correctProcesses) ) {
-                    delivered.add(broadcastMessage);
-                    deliver(broadcastMessage.getHost(), broadcastMessage.getMessage());
-                }
+            if (!delivered.contains(broadcastMessage) && acked.get(broadcastMessage).containsAll(correctProcesses) ) {
+                delivered.add(broadcastMessage);
+                deliver(broadcastMessage.getHost(), broadcastMessage.getMessage());
             }
-        }
     }
 
-    public void deliver(Host host, String message) {
+    public synchronized void deliver(Host host, String message) {
         // synchronized(messagesInBroadcast) {
         //     messagesInBroadcast--;
         // }
@@ -137,7 +134,7 @@ public class UrbLayer implements Layer {
         this.upperLayer = layer;
     }
 
-    public void handleCrash(Host crashedHost) {
+    public synchronized void handleCrash(Host crashedHost) {
         bebLayer.handleCrash(crashedHost);
         checkForDelivery();
     }

@@ -112,11 +112,13 @@ public class TransportLayer implements Layer {
         }
         
         public synchronized void cancelMessageTo(Host host){
+            if (hostToTasks.get(host) ==  null)
+                return;
             for (TimerTask task : hostToTasks.get(host)){
                 if (task != null)
                     task.cancel();
             }
-            hostToTasks.get(host).clear();
+            // hostToTasks.get(host).clear();
         }
 	}
 }
