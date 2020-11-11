@@ -2,9 +2,9 @@ package cs451;
 
 public class PacketIdentifier {
     private Host host; 
-    private int sequenceNumber;
+    private long sequenceNumber;
 
-    public PacketIdentifier(Host host, int sequenceNumber) {
+    public PacketIdentifier(Host host, long sequenceNumber) {
         this.host = host;
         this.sequenceNumber = sequenceNumber;
     }
@@ -30,6 +30,6 @@ public class PacketIdentifier {
 
     @Override
     public int hashCode() {
-        return host.getIp().hashCode() + host.getPort() + sequenceNumber;
+        return host.getIp().hashCode() + host.getPort() + (int)sequenceNumber;
     }
 }

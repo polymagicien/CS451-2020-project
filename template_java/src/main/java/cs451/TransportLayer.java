@@ -14,7 +14,7 @@ public class TransportLayer implements Layer {
     SenderManager senderManager;
     Layer upperLayer = null;
 
-    int maxSequence;
+    long maxSequence;
 
     TransportLayer() {
         delivered = Collections.synchronizedSet(new HashSet<>());
@@ -46,30 +46,26 @@ public class TransportLayer implements Layer {
         else {
             sendAck(sourceHost, parser.getSequenceNumber());
             if (!delivered.contains(packetId)) {
-                // System.out.println("DELIVERED");
                 delivered.add(packetId);
                 if (upperLayer != null){
-                    // System.out.print("Transport : " + parser + "\n");
                     upperLayer.receive(sourceHost, rcvdData);
                 }
                 else{
                     System.out.print("Transport : " + parser + "\n");
                 }
-            } else {
-                // System.out.println("Already delivered");
             }
         }
     }
 
     public void send(Host destHost, String payload) {
-        int sequenceNumber = ++maxSequence;
+        long sequenceNumber = ++maxSequence;
         String rawPayload = sequenceNumber + ";" + payload;
         PacketIdentifier packetId = new PacketIdentifier(destHost, sequenceNumber);
 
         senderManager.schedule(destHost, rawPayload, packetId);
     }
 
-    public void sendAck(Host destHost, int sequenceNumber){
+    public void sendAck(Host destHost, long sequenceNumber){
         String rawPayload = sequenceNumber + ";" + Constants.ACK;
         GroundLayer.send(destHost, rawPayload);
     }
@@ -97,13 +93,12 @@ public class TransportLayer implements Layer {
                         this.cancel();
                     }
                     else{
-                        // System.out.println("Sending");
                         GroundLayer.send(destHost, payload);
                     }
 				}
             };
 
-            if(!this.hostToTasks.keySet().contains(destHost)) {
+            if(!this.hostToTasks.containsKey(destHost)) {
                 this.hostToTasks.put(destHost, new LinkedList<TimerTask>());
             }
             this.hostToTasks.get(destHost).add(task);

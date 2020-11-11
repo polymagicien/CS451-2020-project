@@ -22,6 +22,7 @@ class GroundLayer {
 
 
     public static void start(int listeningPort) {
+        // create socket
         GroundLayer.listeningPort = listeningPort;
         try {
             socket = new DatagramSocket(listeningPort);
@@ -30,13 +31,14 @@ class GroundLayer {
             e.printStackTrace();
         }
 
-        // Start listening thread
+        // start listening thread
         thread = new Thread(() -> {
             listen();
         });
         thread.start();
 
-        threadPool = new LinkedList<>();
+        // create thread pool handling the received messages
+        threadPool = new LinkedList<Thread>();
         receivedMessages = new SynchronizedLinkedList<>();
         for (int i = 0; i < Constants.numThreadGroundLayer; i++) {
             Thread t = new Thread(() -> {
@@ -74,8 +76,8 @@ class GroundLayer {
 
             String ipAddress = senderAddress.getHostAddress();
             Host senderHost = HostList.getHost(ipAddress, senderPort);
+            // save message in pool (will be handled by threads in pool)
             receivedMessages.add(new BroadcastMessage(senderHost, rcvdPayload));
-            // transport.receive(senderHost, rcvdPayload);
 
             if ("**STOP**".equals(rcvdPayload)) {
                 receiving = false;

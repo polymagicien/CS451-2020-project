@@ -4,7 +4,7 @@ public class PacketParser {
     private Host host;
     private String rawPayload;
 
-    private int sequenceNumber;
+    private long sequenceNumber;
     private String data;
 
     public PacketParser(Host host, String payload) {
@@ -17,7 +17,7 @@ public class PacketParser {
         }
         else {
             String arrPayload[] = payload.split(";", 2);
-            sequenceNumber = Integer.parseInt(arrPayload[0]);
+            sequenceNumber = Long.parseLong(arrPayload[0]);
             data = arrPayload[1];
         }
     }
@@ -35,7 +35,7 @@ public class PacketParser {
         this.data = data;
     }
 
-    public int getSequenceNumber() {
+    public long getSequenceNumber() {
         return sequenceNumber;
     }
 
