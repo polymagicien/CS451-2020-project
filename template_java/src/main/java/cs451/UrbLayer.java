@@ -33,34 +33,6 @@ public class UrbLayer implements Layer {
         this.bebLayer = new BebLayer(hosts);
         this.bebLayer.deliverTo(this);
         PingLayer.start(hosts, me);
-
-        // Thread t = new Thread(() -> {
-        //     while (true) {
-        //         // synchronized(messagesInBroadcast){
-        //             // while (messagesInBroadcast >= Constants.MAX_SIMULTANEOUS_BROADCAST) {
-        //             //     try {
-        //             //         wait();
-        //             //     } catch (InterruptedException e) {
-        //             //         e.printStackTrace();
-        //             //     }
-        //             // }
-        //             // messagesInBroadcast++;
-                
-
-        //         String message = messagesToBroadcast.removeFirst();
-        //         BroadcastMessage broadcastMessage = new BroadcastMessage(me, message);
-
-        //         if (!acked.containsKey(broadcastMessage)){
-        //             acked.put(broadcastMessage, new LinkedList<Host>());
-        //         }
-        //         acked.get(broadcastMessage).add(me);
-        //         forward.add(broadcastMessage);
-
-        //         String formattedMessage = me.getId() + ";" + message;
-        //         bebLayer.send(me, formattedMessage);
-        //     }
-        // });
-        // t.start();
     }
     
     public synchronized void send(Host useless, String message) {
@@ -97,32 +69,19 @@ public class UrbLayer implements Layer {
 
     public synchronized void checkForDelivery() {
         for (BroadcastMessage broadcastMessage : forward) {
-            Set<Host> correctProcesses = PingLayer.getCorrectProcesses();
-            if (!delivered.contains(broadcastMessage) && acked.get(broadcastMessage).containsAll(correctProcesses) ) {
-                delivered.add(broadcastMessage);
-                deliver(broadcastMessage.getHost(), broadcastMessage.getMessage());
-            }
+            checkForDelivery(broadcastMessage);
         }
     }
 
     public synchronized void checkForDelivery(BroadcastMessage broadcastMessage) {
-        // System.out.println("-----------------------------");
-        // System.out.println("Received : " + broadcastMessage);
-        // for(Host host : acked.get(broadcastMessage)){
-        //     System.out.print(host.getId() + "  ");
-        // }
-        // System.out.println("\n-----------------------------");
-            Set<Host> correctProcesses = PingLayer.getCorrectProcesses();
-            if (!delivered.contains(broadcastMessage) && acked.get(broadcastMessage).containsAll(correctProcesses) ) {
-                delivered.add(broadcastMessage);
-                deliver(broadcastMessage.getHost(), broadcastMessage.getMessage());
-            }
+        Set<Host> correctProcesses = PingLayer.getCorrectProcesses();
+        if (!delivered.contains(broadcastMessage) && acked.get(broadcastMessage).containsAll(correctProcesses) ) {
+            delivered.add(broadcastMessage);
+            deliver(broadcastMessage.getHost(), broadcastMessage.getMessage());
+        }
     }
 
     public synchronized void deliver(Host host, String message) {
-        // synchronized(messagesInBroadcast) {
-        //     messagesInBroadcast--;
-        // }
         if (upperLayer != null){
             upperLayer.receive(host, message);
         } else {

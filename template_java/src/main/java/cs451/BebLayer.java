@@ -26,7 +26,6 @@ public class BebLayer implements Layer {
 
     public void receive(Host host, String message) {
         if (upperLayer != null) {
-            // System.out.println("Beb : " + host + " - " + message);
             upperLayer.receive(host, message);
         }
         else {
