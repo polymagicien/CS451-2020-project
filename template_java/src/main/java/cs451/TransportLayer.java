@@ -3,7 +3,9 @@ package cs451;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
@@ -78,7 +80,7 @@ public class TransportLayer implements Layer {
 
     class SenderManager {
         private Timer timer;
-        private Map<Host, LinkedList<TimerTask>> hostToTasks;
+        private Map<Host, List<TimerTask>> hostToTasks;
         private Set<Host> cancelled;
         
         public SenderManager() {
@@ -93,15 +95,24 @@ public class TransportLayer implements Layer {
                 @Override
                 public void run() {
                     
-                    if (cancelled.contains(destHost) && hostToTasks.get(destHost) !=  null) {
-                        for (TimerTask task : hostToTasks.get(destHost)){
-                            if (task != null)
-                                task.cancel();
+                    if (cancelled.contains(destHost) && hostToTasks.containsKey(destHost)) {
+                        List<TimerTask> listTask = hostToTasks.get(destHost);
+
+                        synchronized (listTask) {
+                            Iterator<TimerTask> i = listTask.iterator(); // Must be in synchronized block
+                            while (i.hasNext()){
+                                TimerTask t = i.next();
+                                if (t != null)
+                                    t.cancel();
+                            }
+                            listTask.clear();
                         }
                     }
 
                     if (acknowledged.contains(packetId)) {
                         this.cancel();
+                        List<TimerTask> listTask = hostToTasks.get(destHost);
+                        listTask.remove(this);
                     }
                     else{
                         GroundLayer.send(destHost, payload);
@@ -110,7 +121,7 @@ public class TransportLayer implements Layer {
             };
 
             if(!this.hostToTasks.containsKey(destHost)) {
-                this.hostToTasks.put(destHost, new LinkedList<TimerTask>());
+                this.hostToTasks.put(destHost, Collections.synchronizedList(new LinkedList<TimerTask>()));
             }
             this.hostToTasks.get(destHost).add(task);
 
