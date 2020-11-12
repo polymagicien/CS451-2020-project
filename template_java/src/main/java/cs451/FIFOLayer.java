@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
 
@@ -15,8 +16,8 @@ public class FIFOLayer implements Layer {
     private Layer upperLayer;
     private long orderingNumber;
 
-    private HashMap<Host, PriorityQueue<PacketParser>> hostToMessages;
-    private HashMap<Host, Long> hostToLastDelivered;
+    private Map<Host, PriorityQueue<PacketParser>> hostToMessages;
+    private Map<Host, Long> hostToLastDelivered;
 
     private Set<Long> broadcastSent;
     private String log;
@@ -27,8 +28,8 @@ public class FIFOLayer implements Layer {
         this.urbLayer.deliverTo(this);
         this.orderingNumber = INITIAL_ORDERING_NUMBER;
 
-        this.hostToMessages = new HashMap<>();
-        this.hostToLastDelivered = new HashMap<>();
+        this.hostToMessages = Collections.synchronizedMap(new HashMap<>());
+        this.hostToLastDelivered = Collections.synchronizedMap(new HashMap<>());
 
         this.broadcastSent = Collections.synchronizedSet(new HashSet<>());
         this.log = "";
