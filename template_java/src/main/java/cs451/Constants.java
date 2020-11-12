@@ -2,7 +2,7 @@ package cs451;
 
 public class Constants {
 
-    public static final int numThreadGroundLayer = 1;
+    public static final int numThreadGroundLayer = 4;
     public static final String ACK = "**ACK**";
     public static final String PING = "**PING**";
     public static final int DELAY_RETRANSMIT = 90; // ms
