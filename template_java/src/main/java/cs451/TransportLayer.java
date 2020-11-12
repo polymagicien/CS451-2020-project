@@ -91,7 +91,7 @@ public class TransportLayer implements Layer {
 
         public void schedule(Host destHost, String payload, PacketIdentifier packetId) {
             // Define new task
-            TimerTask task = new TimerTask() {
+            TimerTask task = new TimerTask() { 
                 @Override
                 public void run() {
                     
