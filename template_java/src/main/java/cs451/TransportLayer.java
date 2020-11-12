@@ -78,10 +78,12 @@ public class TransportLayer implements Layer {
     class SenderManager {
         private Timer timer;
         private HashMap<Host, LinkedList<TimerTask>> hostToTasks;
+        private Set<Host> cancelled;
         
         public SenderManager() {
             this.timer = new Timer();
             this.hostToTasks = new HashMap<>();
+            this.cancelled = Collections.synchronizedSet(new HashSet<>());
         }
 
         public synchronized void schedule(Host destHost, String payload, PacketIdentifier packetId) {
@@ -89,6 +91,14 @@ public class TransportLayer implements Layer {
             TimerTask task = new TimerTask() {
                 @Override
                 public void run() {
+                    
+                    if (cancelled.contains(destHost) && hostToTasks.get(destHost) !=  null) {
+                        for (TimerTask task : hostToTasks.get(destHost)){
+                            if (task != null)
+                                task.cancel();
+                        }
+                    }
+
                     if (acknowledged.contains(packetId)) {
                         this.cancel();
                     }
@@ -107,15 +117,9 @@ public class TransportLayer implements Layer {
         }
         
         public synchronized void cancelMessageTo(Host host){
-            if (hostToTasks.get(host) ==  null)
-                return;
-            for (TimerTask task : hostToTasks.get(host)){
-                if (task != null)
-                    task.cancel();
-            }
-            // hostToTasks.get(host).clear();
+            cancelled.add(host);
         }
-	}
+    }
 
     @Override
     public String waitFinishBroadcasting() {

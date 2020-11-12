@@ -2,3 +2,5 @@ template_java/.settings
 .classpath
 .project
 __pycache__/
+*.log
+logs/*
