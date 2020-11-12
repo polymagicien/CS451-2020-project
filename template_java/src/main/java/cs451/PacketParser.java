@@ -1,5 +1,18 @@
 package cs451;
 
+import java.util.Comparator;
+
+class SortBySequenceNumber implements Comparator<PacketParser> 
+{ 
+    // Used for sorting in ascending order of 
+    // roll name 
+    public int compare(PacketParser a, PacketParser b) 
+    { 
+        return (int)(a.getSequenceNumber() - b.getSequenceNumber()); 
+    } 
+} 
+
+
 public class PacketParser {
     private Host host;
     private String rawPayload;
@@ -25,6 +38,21 @@ public class PacketParser {
     @Override
     public String toString(){
         return   "" + host + " - " + rawPayload ;
+    }
+
+    @Override
+    public int hashCode() {
+        return host.hashCode() + 7*(int)sequenceNumber + 29*data.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null)
+            return false;
+        if(!(o instanceof PacketParser))
+            return false;
+        PacketParser other = (PacketParser)o;
+        return this.host.equals(other.host) && this.data.equals(other.data) && this.sequenceNumber == other.sequenceNumber;
     }
 
     public String getData() {

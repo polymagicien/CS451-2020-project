@@ -75,21 +75,25 @@ public class Main {
         GroundLayer.start(me.getPort());
         Layer appli = new ApplicationLayer(parser.hosts(), me);
 
-        if (parser.myId() == 1){
-            BufferedReader reader;
-            try {
-                reader = new BufferedReader(new FileReader("sent.txt"));
-                String line = reader.readLine();
-                while (line != null) {
-                    appli.send(null, line);
-                    line = reader.readLine();
-                }
-                reader.close();
-            } catch (IOException e) {
-                System.err.println("Unable to open file");
+        // if (parser.myId() == 1){
+        //     BufferedReader reader;
+        //     try {
+        //         reader = new BufferedReader(new FileReader("sent.txt"));
+        //         String line = reader.readLine();
+        //         while (line != null) {
+        //             appli.send(null, line);
+        //             line = reader.readLine();
+        //         }
+        //         reader.close();
+        //     } catch (IOException e) {
+        //         System.err.println("Unable to open file");
+        //     }
+        // }
+        // if (parser.myId() == 1){
+            for (int i = 0; i < 1000; i++) {
+                appli.send(null, ""+i);
             }
-        }
-        talk(appli, parser.hosts().get(0));
+        // }
 
         System.out.println("Signaling end of broadcasting messages");
             coordinator.finishedBroadcasting();

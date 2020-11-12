@@ -12,7 +12,6 @@ class GroundLayer {
     private static Layer transport = null;
     private static Thread thread;
 
-    private static int listeningPort;
     private static boolean receiving = true;
     private static DatagramSocket socket;
     private static byte[] buf = new byte[256];
@@ -23,7 +22,6 @@ class GroundLayer {
 
     public static void start(int listeningPort) {
         // create socket
-        GroundLayer.listeningPort = listeningPort;
         try {
             socket = new DatagramSocket(listeningPort);
         } catch (SocketException e) {

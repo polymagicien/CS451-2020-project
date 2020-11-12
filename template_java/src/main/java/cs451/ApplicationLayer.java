@@ -7,7 +7,7 @@ public class ApplicationLayer implements Layer {
     Integer counter = 0;
 
     public ApplicationLayer(List<Host> hosts, Host me) {
-        lowerLayer = new UrbLayer(hosts, me);
+        lowerLayer = new FIFOLayer(hosts, me);
         lowerLayer.deliverTo(this);
 
         PingLayer.setNotifiedLayer(this);
