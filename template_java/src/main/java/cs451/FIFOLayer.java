@@ -8,6 +8,8 @@ import java.util.PriorityQueue;
 import java.util.Set;
 
 public class FIFOLayer implements Layer {
+    private static final long INITIAL_ORDERING_NUMBER = 1L;
+
     private Host me;
     private Layer urbLayer;
     private Layer upperLayer;
@@ -23,7 +25,7 @@ public class FIFOLayer implements Layer {
         this.me = me;
         this.urbLayer = new UrbLayer(hosts, me);
         this.urbLayer.deliverTo(this);
-        this.orderingNumber = 0;
+        this.orderingNumber = INITIAL_ORDERING_NUMBER;
 
         this.hostToMessages = new HashMap<>();
         this.hostToLastDelivered = new HashMap<>();
@@ -48,7 +50,7 @@ public class FIFOLayer implements Layer {
 
         if (!hostToMessages.containsKey(host)) {
             hostToMessages.put(host, new PriorityQueue<PacketParser>(new SortBySequenceNumber()));
-            hostToLastDelivered.put(host, -1L);
+            hostToLastDelivered.put(host, INITIAL_ORDERING_NUMBER - 1);
         }
 
         hostToMessages.get(host).add(packet);

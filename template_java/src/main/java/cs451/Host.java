@@ -54,7 +54,7 @@ public class Host {
     }
 
     @Override
-    public synchronized int hashCode() {
+    public int hashCode() {
         return this.ip.hashCode() + 11*this.port;
     }
 
@@ -64,7 +64,7 @@ public class Host {
     }
 
     @Override
-    public synchronized boolean equals(Object o) {
+    public boolean equals(Object o) {
         if (o == null)
             return false;
         if(!(o instanceof Host))
