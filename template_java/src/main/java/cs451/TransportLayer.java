@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -77,16 +78,16 @@ public class TransportLayer implements Layer {
 
     class SenderManager {
         private Timer timer;
-        private HashMap<Host, LinkedList<TimerTask>> hostToTasks;
+        private Map<Host, LinkedList<TimerTask>> hostToTasks;
         private Set<Host> cancelled;
         
         public SenderManager() {
             this.timer = new Timer();
-            this.hostToTasks = new HashMap<>();
+            this.hostToTasks = Collections.synchronizedMap(new HashMap<>());
             this.cancelled = Collections.synchronizedSet(new HashSet<>());
         }
 
-        public synchronized void schedule(Host destHost, String payload, PacketIdentifier packetId) {
+        public void schedule(Host destHost, String payload, PacketIdentifier packetId) {
             // Define new task
             TimerTask task = new TimerTask() {
                 @Override
@@ -116,7 +117,7 @@ public class TransportLayer implements Layer {
 			this.timer.scheduleAtFixedRate(task, 0, Constants.DELAY_RETRANSMIT);
         }
         
-        public synchronized void cancelMessageTo(Host host){
+        public void cancelMessageTo(Host host){
             cancelled.add(host);
         }
     }
