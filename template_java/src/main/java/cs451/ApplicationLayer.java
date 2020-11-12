@@ -19,9 +19,11 @@ public class ApplicationLayer implements Layer {
 
     public void receive(Host host, String message) {
         synchronized(counter){
-            System.out.println("Received " + ++counter);
+            counter++;
+
+            if (counter % 100 == 0)
+                System.out.println("Received " + counter);
         }
-        // System.out.println("APPLI : " + host + " - " + message);
     }
 
     public void deliverTo(Layer layer) {
@@ -32,6 +34,8 @@ public class ApplicationLayer implements Layer {
         lowerLayer.handleCrash(crashedHost);
     }
 
-
+    public String waitFinishBroadcasting() {
+        return lowerLayer.waitFinishBroadcasting();
+    }
     
 }

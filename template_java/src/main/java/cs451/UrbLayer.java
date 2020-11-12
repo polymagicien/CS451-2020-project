@@ -97,5 +97,11 @@ public class UrbLayer implements Layer {
         bebLayer.handleCrash(crashedHost);
         checkForDelivery();
     }
+
+    @Override
+    public String waitFinishBroadcasting() {
+        // TODO Auto-generated method stub
+        return null;
+    }
     
 }

@@ -7,5 +7,6 @@ public interface Layer {
     public void deliverTo(Layer layer);
 
     public void handleCrash(Host crashedHost);
+	public String waitFinishBroadcasting();
 
 }

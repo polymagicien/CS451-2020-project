@@ -1,18 +1,33 @@
 package cs451;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
 
 public class Main {
 
+    private static Layer applicationLayer;
+    private static String outputFile = "default.txt";
+    private static int numBroadcasts = 100;
+
     private static void handleSignal() {
         //immediately stop network packet processing
         System.out.println("Immediately stopping network packet processing.");
-
         //write/flush output file if necessary
         System.out.println("Writing output.");
+        try {
+            FileWriter myWriter = new FileWriter(outputFile, false);
+            myWriter.write(applicationLayer.waitFinishBroadcasting());
+            myWriter.close();
+
+            System.out.println("Successfully wrote to the file.");
+          } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
     }
 
     private static void initSignalHandlers() {
@@ -56,9 +71,19 @@ public class Main {
         // if config is defined; always check before parser.config()
         if (parser.hasConfig()) {
             System.out.println("Config: " + parser.config());
+
+            try {
+                File myObj = new File(parser.config());
+                Scanner myReader = new Scanner(myObj);
+                numBroadcasts = Integer.valueOf(myReader.nextLine());
+                myReader.close();
+              } catch (IOException e) {
+                System.out.println("An error occurred.");
+                e.printStackTrace();
+            }
         }
 
-
+        outputFile = parser.output();
         Coordinator coordinator = new Coordinator(parser.myId(), parser.barrierIp(), parser.barrierPort(), parser.signalIp(), parser.signalPort());
 
         System.out.println("Waiting for all processes for finish initialization");
@@ -73,30 +98,15 @@ public class Main {
         }
         HostList.populate(parser.hosts());
         GroundLayer.start(me.getPort());
-        Layer appli = new ApplicationLayer(parser.hosts(), me);
+        applicationLayer = new ApplicationLayer(parser.hosts(), me);
 
-        // if (parser.myId() == 1){
-        //     BufferedReader reader;
-        //     try {
-        //         reader = new BufferedReader(new FileReader("sent.txt"));
-        //         String line = reader.readLine();
-        //         while (line != null) {
-        //             appli.send(null, line);
-        //             line = reader.readLine();
-        //         }
-        //         reader.close();
-        //     } catch (IOException e) {
-        //         System.err.println("Unable to open file");
-        //     }
-        // }
-        // if (parser.myId() == 1){
-            for (int i = 0; i < 1000; i++) {
-                appli.send(null, ""+i);
-            }
-        // }
+        for (int i = 0; i < numBroadcasts; i++) {
+            applicationLayer.send(null, ""+i);
+        }
+        String log = applicationLayer.waitFinishBroadcasting();
 
         System.out.println("Signaling end of broadcasting messages");
-            coordinator.finishedBroadcasting();
+        coordinator.finishedBroadcasting();
 
         while (true) {
             // Sleep for 1 hour

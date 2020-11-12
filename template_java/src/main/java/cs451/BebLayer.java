@@ -40,5 +40,11 @@ public class BebLayer implements Layer {
     public void handleCrash(Host crashedHost) {
         transport.handleCrash(crashedHost);
     }
+
+    @Override
+    public String waitFinishBroadcasting() {
+        // TODO Auto-generated method stub
+        return null;
+    }
     
 }
