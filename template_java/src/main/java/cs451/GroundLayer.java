@@ -29,12 +29,6 @@ class GroundLayer {
             e.printStackTrace();
         }
 
-        // start listening thread
-        thread = new Thread(() -> {
-            listen();
-        });
-        thread.start();
-
         // create thread pool handling the received messages
         threadPool = new LinkedList<Thread>();
         receivedMessages = new SynchronizedLinkedList<>();
@@ -48,6 +42,12 @@ class GroundLayer {
             threadPool.add(t);
             t.start();
         }
+
+        // start listening thread
+        thread = new Thread(() -> {
+            listen();
+        });
+        thread.start();
     }
 
     public static void deliverTo(Layer transport) {
