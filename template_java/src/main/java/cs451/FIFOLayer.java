@@ -3,10 +3,12 @@ package cs451;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class FIFOLayer implements Layer {
     private static final long INITIAL_ORDERING_NUMBER = 1L;
@@ -20,7 +22,7 @@ public class FIFOLayer implements Layer {
     private Map<Host, Long> hostToLastDelivered;
 
     private Set<Long> broadcastSent;
-    private String log;
+    private List<String> log;
 
     public FIFOLayer(List<Host> hosts, Host me) {
         this.me = me;
@@ -32,13 +34,13 @@ public class FIFOLayer implements Layer {
         this.hostToLastDelivered = Collections.synchronizedMap(new HashMap<>());
 
         this.broadcastSent = Collections.synchronizedSet(new HashSet<>());
-        this.log = "";
+        this.log = Collections.synchronizedList(new LinkedList<>());
     }
 
     @Override
     public void send(Host host, String message) {
         broadcastSent.add(orderingNumber);
-        log += "b " + orderingNumber + "\n";
+        log.add("b " + orderingNumber + "\n");
 
         String rawMessage = orderingNumber + ";" + message;
         urbLayer.send(null, rawMessage);
@@ -65,7 +67,7 @@ public class FIFOLayer implements Layer {
                 if (host.equals(me) ) {
                     broadcastSent.remove(p.getSequenceNumber());
                 }
-                log += "d " + host.getId() + " " + p.getSequenceNumber() + "\n";
+                log.add("d " + host.getId() + " " + p.getSequenceNumber() + "\n");
 
                 deliver(host, p.getData());
                 lastDelivered++;
@@ -100,16 +102,20 @@ public class FIFOLayer implements Layer {
         this.urbLayer.handleCrash(crashedHost);
     }
 
-    public String waitFinishBroadcasting() {
+    public String waitFinishBroadcasting(boolean retString) {
         while (broadcastSent.size() > 0) {
             try {
-                Thread.sleep(1);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
-        return log;
+        
+        if (retString) {
+            return log.stream().collect(Collectors.joining(""));
+        }
+        return "";
+
     }
     
 }
