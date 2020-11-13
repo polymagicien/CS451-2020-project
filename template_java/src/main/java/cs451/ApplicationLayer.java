@@ -34,8 +34,8 @@ public class ApplicationLayer implements Layer {
         lowerLayer.handleCrash(crashedHost);
     }
 
-    public String waitFinishBroadcasting() {
-        return lowerLayer.waitFinishBroadcasting();
+    public String waitFinishBroadcasting(boolean retString) {
+        return lowerLayer.waitFinishBroadcasting(retString);
     }
     
 }

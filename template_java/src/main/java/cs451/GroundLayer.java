@@ -35,8 +35,10 @@ class GroundLayer {
         for (int i = 0; i < Constants.numThreadGroundLayer; i++) {
             Thread t = new Thread(() -> {
                 while(true){
-                    BroadcastMessage m = receivedMessages.removeFirst();
-                    transport.receive(m.getHost(), m.getMessage());
+                    if(transport != null) {
+                        BroadcastMessage m = receivedMessages.removeFirst();
+                        transport.receive(m.getHost(), m.getMessage());
+                    }
                 }
             });
             threadPool.add(t);

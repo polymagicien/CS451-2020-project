@@ -18,7 +18,7 @@ public class Main {
         System.out.println("Writing output.");
         try {
             FileWriter myWriter = new FileWriter(outputFile, false);
-            myWriter.write(applicationLayer.waitFinishBroadcasting());
+            myWriter.write(applicationLayer.waitFinishBroadcasting(true));
             myWriter.close();
 
             System.out.println("Successfully wrote to the file.");
@@ -95,13 +95,14 @@ public class Main {
                 me = host;
         }
         HostList.populate(parser.hosts());
-        GroundLayer.start(me.getPort());
         applicationLayer = new ApplicationLayer(parser.hosts(), me);
+        GroundLayer.start(me.getPort());
+        PingLayer.start(parser.hosts(), me);
 
         for (int i = 1; i <= numBroadcasts; i++) {
             applicationLayer.send(null, ""+i);
         }
-        String log = applicationLayer.waitFinishBroadcasting();
+        String log = applicationLayer.waitFinishBroadcasting(false);
 
         System.out.println("Signaling end of broadcasting messages");
         coordinator.finishedBroadcasting();

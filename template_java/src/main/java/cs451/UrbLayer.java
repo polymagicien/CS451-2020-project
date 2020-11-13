@@ -3,6 +3,7 @@ package cs451;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +33,6 @@ public class UrbLayer implements Layer {
 
         this.bebLayer = new BebLayer(hosts);
         this.bebLayer.deliverTo(this);
-        PingLayer.start(hosts, me);
     }
     
     public synchronized void send(Host useless, String message) {
@@ -68,8 +68,11 @@ public class UrbLayer implements Layer {
     }
 
     public synchronized void checkForDelivery() {
-        for (BroadcastMessage broadcastMessage : forward) {
-            checkForDelivery(broadcastMessage);
+        synchronized(forward) {
+            Iterator<BroadcastMessage> i = forward.iterator();
+            while(i.hasNext()) {
+                checkForDelivery(i.next());
+            }
         }
     }
 
@@ -99,9 +102,8 @@ public class UrbLayer implements Layer {
     }
 
     @Override
-    public String waitFinishBroadcasting() {
-        // TODO Auto-generated method stub
-        return null;
+    public String waitFinishBroadcasting(boolean retString) {
+        throw new UnsupportedOperationException();
     }
     
 }

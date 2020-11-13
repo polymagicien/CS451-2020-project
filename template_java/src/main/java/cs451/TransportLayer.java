@@ -134,8 +134,7 @@ public class TransportLayer implements Layer {
     }
 
     @Override
-    public String waitFinishBroadcasting() {
-        // TODO Auto-generated method stub
-        return null;
+    public String waitFinishBroadcasting(boolean retString) {
+        throw new UnsupportedOperationException();
     }
 }
