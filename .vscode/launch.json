@@ -5,12 +5,20 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Current File",
+            "name": "Fifo",
             "type": "python",
             "request": "launch",
             "program": "validate.py",
             "args" : ["-r", "template_java/run.sh", "-b", "fifo", "-l", "logs/", "-p", "3", "-m", "100"],
             "console": "integratedTerminal"
-        }
+        },
+        {
+            "name": "LCB_validattion",
+            "type": "python",
+            "request": "launch",
+            "program": "validate_LCB.py",
+            "args" : ["test/hosts", "test/config"],
+            "console": "integratedTerminal"
+        },
     ]
 }
