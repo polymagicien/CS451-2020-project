@@ -4,3 +4,4 @@ template_java/.settings
 __pycache__/
 *.log
 logs/*
+.vscode/settings.json

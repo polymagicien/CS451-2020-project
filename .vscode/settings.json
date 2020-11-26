@@ -1,9 +1,0 @@
-{
-    "java.home": "/usr/lib/jvm/java-11-openjdk-amd64",
-    "files.exclude": {
-        "**/.classpath": true,
-        "**/.project": true,
-        "**/.settings": true,
-        "**/.factorypath": true
-    }
-}
