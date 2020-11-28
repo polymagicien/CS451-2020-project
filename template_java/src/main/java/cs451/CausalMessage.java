@@ -1,36 +1,34 @@
 package cs451;
 
-import java.io.StringReader;
 import java.util.Arrays;
 
 public class CausalMessage {
 
     private String message;
     private Host source;
-    private int[] VC;
+    private int[] vc;
 
-    public CausalMessage(Host source, String payload) {
-        this.source = source;
-        this.parsePayload(payload);
-    }
-
-    public CausalMessage(Host source, String message, int[] VC) {
+    public CausalMessage(Host source, String message, int[] vc) {
         this.source = source;
         this.message = message;
-        this.VC = VC;
+        this.vc = vc;
     }
 
-    /**
-     * Parse the payload of the form "message; VC[0], VC[1], ..."
-     * 
-     * @param payload
-     */
-    private void parsePayload(String payload) {
+    public int[] getVc() {
+        return vc;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public Host getSource() {
+        return source;
     }
 
     @Override
     public int hashCode() {
-        return this.source.hashCode() + 7*this.message.hashCode() + 29*this.VC.hashCode()
+        return this.source.hashCode() + 7 * this.message.hashCode() + 29 * this.vc.hashCode();
     }
 
     @Override
@@ -41,6 +39,6 @@ public class CausalMessage {
             return false;
         CausalMessage other = (CausalMessage) o;
         return this.source.equals(other.source) && this.message.equals(other.message)
-                && Arrays.equals(this.VC, other.VC);
+                && Arrays.equals(this.vc, other.vc);
     }
 }

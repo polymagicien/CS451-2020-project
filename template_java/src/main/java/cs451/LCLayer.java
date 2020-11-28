@@ -1,7 +1,8 @@
 package cs451;
 
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.List;
 
 
@@ -13,7 +14,8 @@ public class LCLayer implements Layer {
 	private Layer upperLayer;
 	
     private int[] vc;
-    private Map<Host, List<Host>> dependency;
+	private Map<Host, List<Host>> dependency;
+	private Set<CausalMessage> pending;
 
     LCLayer(List<Host> hosts, Host me) {
 		this.me = me;
@@ -21,18 +23,41 @@ public class LCLayer implements Layer {
 		this.urbLayer.deliverTo(this);
 
 		this.vc = new int[hosts.size() + 1];
-
-
+		this.pending = new HashSet<>();
     }
 
-	public void send(Host host, String message) {
-		// TODO Auto-generated method stub
-		
+	public void send(Host useless, String message) {
+		String s = message + ";" + getStringDependency(dependency.get(me));
+		vc[me.getId()] ++;
+		urbLayer.send(null, s);
 	}
 
-	public void receive(Host host, String message) {
-		// TODO Auto-generated method stub
-		
+	public void receive(Host host, String payload) {
+		String message = payload.split(";", 2)[0];
+		String stringVc = payload.split(";", 2)[1];
+		int[] vcm = parseVC(stringVc);
+		CausalMessage m = new CausalMessage(host, message, vcm);
+		pending.add(m);
+
+		deliverPending();
+	}
+
+	public void deliverPending() {
+		boolean oneWasDelivered = true;
+
+		while (oneWasDelivered) {
+			oneWasDelivered = false;
+			for (CausalMessage causalMessage : pending) {
+				if (matchRequirements(causalMessage.getVc())) {
+					vc[causalMessage.getSource().getId()] += 1;
+					pending.remove(causalMessage);
+					oneWasDelivered = true;
+					deliver(causalMessage.getSource(), causalMessage.getMessage());
+					break;
+				}
+			}
+		}
+
 	}
 
 	public void deliverTo(Layer layer) {
@@ -43,28 +68,28 @@ public class LCLayer implements Layer {
         if (upperLayer != null) {
             upperLayer.receive(host, message);
         } else {
-            System.out.println("FIFO : " + host + " - " + message);
+            System.out.println("LCausal : " + host + " - " + message);
         }
     }
 
 	public void handleCrash(Host crashedHost) {
-				
+        this.urbLayer.handleCrash(crashedHost);
 	}
 
 	public String waitFinishBroadcasting(boolean retString) {
 		return null;
 	}
 
-	private static int[] parseVC(String strVC) {
-        String[] v = strVC.split(";");
+	private int[] parseVC(String strVC) {
+        String[] strVcList = strVC.split(";");
 
-        int[] vc = new int[v.length];
+        int[] v = new int[vc.length];
         for (int i = 0; i < v.length; i++) {
-			int hostId = Integer.valueOf(v[i].split(":")[0]);
-			int require = Integer.valueOf(v[i].split(":")[1]);
-			vc[hostId] = require;
+			int hostId = Integer.valueOf(strVcList[i].split(":")[0]);
+			int require = Integer.valueOf(strVcList[i].split(":")[1]);
+			v[hostId] = require;
 		}
-        return vc;
+        return v;
     }
 
 	private String getStringDependency(List<Host> dependencies) {
@@ -81,6 +106,14 @@ public class LCLayer implements Layer {
 		}
 		s = s.substring(0, s.length() - 1);
         return s;
-    }
+	}
+	
+	private boolean matchRequirements(int[] vcm) {
+		for (int i = 1; i < vcm.length; i++) {
+			if (vcm[i] > vc[i])
+				return false;
+		}
+		return true;
+	}
     
 }
