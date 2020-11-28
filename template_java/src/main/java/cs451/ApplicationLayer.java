@@ -1,13 +1,14 @@
 package cs451;
 
 import java.util.List;
+import java.util.Map;
 
 public class ApplicationLayer implements Layer {
     Layer lowerLayer;
     Integer counter = 0;
 
-    public ApplicationLayer(List<Host> hosts, Host me) {
-        lowerLayer = new LCLayer(hosts, me);
+    public ApplicationLayer(List<Host> hosts, Host me, Map<Host, List<Host>> dependency) {
+        lowerLayer = new LCLayer(hosts, me, dependency);
         lowerLayer.deliverTo(this);
 
         PingLayer.setNotifiedLayer(this);

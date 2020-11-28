@@ -3,6 +3,9 @@ package cs451;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 public class Main {
@@ -95,14 +98,18 @@ public class Main {
                 me = host;
         }
         HostList.populate(parser.hosts());
-        applicationLayer = new ApplicationLayer(parser.hosts(), me);
+
+        Map<Host, List<Host>> dependency = new HashMap<>();
+        // TODO : parse config file for dependencies
+        
+        applicationLayer = new ApplicationLayer(parser.hosts(), me, dependency);
         GroundLayer.start(me.getPort());
         PingLayer.start(parser.hosts(), me);
 
         for (int i = 1; i <= numBroadcasts; i++) {
             applicationLayer.send(null, ""+i);
         }
-        String log = applicationLayer.waitFinishBroadcasting(false);
+        applicationLayer.waitFinishBroadcasting(false);
 
         System.out.println("Signaling end of broadcasting messages");
         coordinator.finishedBroadcasting();

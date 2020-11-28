@@ -1,10 +1,13 @@
 package cs451;
 
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import java.util.List;
 
+// TODO : add logs for later printing
 
 public class LCLayer implements Layer {
 
@@ -17,13 +20,21 @@ public class LCLayer implements Layer {
 	private Map<Host, List<Host>> dependency;
 	private Set<CausalMessage> pending;
 
-    LCLayer(List<Host> hosts, Host me) {
+	private Set<BroadcastMessage> broadcastSent;
+	private List<String> log;
+
+    LCLayer(List<Host> hosts, Host me, Map<Host, List<Host>> dependency) {
 		this.me = me;
 		this.urbLayer = new UrbLayer(hosts, me);
 		this.urbLayer.deliverTo(this);
+		this.dependency = dependency;
 
 		this.vc = new int[hosts.size() + 1];
 		this.pending = new HashSet<>();
+
+		
+        this.broadcastSent = Collections.synchronizedSet(new HashSet<>());
+        this.log = Collections.synchronizedList(new LinkedList<>());
     }
 
 	public void send(Host useless, String message) {
@@ -77,6 +88,7 @@ public class LCLayer implements Layer {
 	}
 
 	public String waitFinishBroadcasting(boolean retString) {
+		// TODO : implement waitFinishBroadcasting
 		return null;
 	}
 
