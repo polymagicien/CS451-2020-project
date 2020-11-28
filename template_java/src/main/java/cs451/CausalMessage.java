@@ -1,6 +1,16 @@
 package cs451;
 
 import java.util.Arrays;
+import java.util.Comparator;
+
+
+class SortBySendingOrder implements Comparator<CausalMessage> 
+{ 
+    public int compare(CausalMessage a, CausalMessage b) 
+    { 
+        return (int)(a.getSelfNumber() - b.getSelfNumber()); 
+    }
+} 
 
 public class CausalMessage {
 
@@ -24,6 +34,10 @@ public class CausalMessage {
 
     public Host getSource() {
         return source;
+    }
+
+    public int getSelfNumber() {
+        return vc[source.getId()];
     }
 
     @Override

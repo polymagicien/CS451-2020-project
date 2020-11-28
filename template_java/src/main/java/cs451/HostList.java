@@ -11,6 +11,10 @@ public class HostList {
         HostList.declaredHosts.addAll(declaredHost);
     }
 
+    public static synchronized List<Host> getAllHost() {
+        return declaredHosts;
+    }
+
     public static synchronized Host getHost(String ipAddress, int port) {
         for (Host host : declaredHosts) {
             if (host.getIp().equals(ipAddress) && host.getPort() == port)

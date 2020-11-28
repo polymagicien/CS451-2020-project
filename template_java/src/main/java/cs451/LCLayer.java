@@ -2,16 +2,17 @@ package cs451;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import java.util.List;
-
-// TODO : add logs for later printing
 
 public class LCLayer implements Layer {
 
@@ -22,8 +23,9 @@ public class LCLayer implements Layer {
 
 	private List<Integer> vc;
 	private Map<Host, List<Host>> dependency;
-	private Set<CausalMessage> pending;
+	private Map<Host, PriorityQueue<CausalMessage>> pending;
 	private int num_sent = 0;
+	private AtomicInteger numPending;
 
 	private Set<Integer> broadcastSent;
 	private List<String> log;
@@ -34,19 +36,23 @@ public class LCLayer implements Layer {
 		this.urbLayer.deliverTo(this);
 		this.dependency = dependency;
 
-		System.out.println("" + hosts.size());
 		this.vc = Collections.synchronizedList(new ArrayList<>(hosts.size() + 1));
 		for (int i = 0; i < hosts.size() + 1; i++) {
 			this.vc.add(0);
 		}
 
-		this.pending = Collections.synchronizedSet(new HashSet<>());
+		// Initialize pending
+		this.pending = Collections.synchronizedMap(new HashMap<>());
+		for (Host host : hosts) {
+			pending.put(host, new PriorityQueue<CausalMessage>(new SortBySendingOrder()));
+		}
+		numPending = new AtomicInteger(0);
 
 		this.broadcastSent = Collections.synchronizedSet(new HashSet<>());
 		this.log = Collections.synchronizedList(new LinkedList<>());
 
 		Thread t = new Thread(() -> {
-			while(true) {
+			while (true) {
 				deliverPending();
 				try {
 					Thread.sleep(100);
@@ -58,12 +64,24 @@ public class LCLayer implements Layer {
 		t.start();
 	}
 
+	// public void printPending() {
+	// 	synchronized(pending){
+	// 		CausalMessage m;
+	// 		for (Host host : HostList.getAllHost()) {
+	// 			PriorityQueue<CausalMessage> prio = pending.get(host);
+	// 			System.out.println(host.getId() + "  ---------  ");
+	// 			while((m = prio.poll()) != null) {
+	// 				System.out.println(m);
+	// 			}
+	// 		}
+	// 	}
+	// }
+
 	public void send(Host useless, String message) {
 		String s = message + ";" + getStringDependency(dependency.get(me));
 		urbLayer.send(null, s);
 		num_sent++;
 
-		System.out.println("SEND " + s);
 		// log
 		broadcastSent.add(vc.get(me.getId()));
 		log.add("b " + message + "\n");
@@ -75,44 +93,40 @@ public class LCLayer implements Layer {
 		int[] vcm = parseVC(stringVc);
 
 		CausalMessage m = new CausalMessage(host, message, vcm);
-		System.out.println("RCV " + m);
-		// System.out.println("VC " + vc.toString());
 		synchronized (pending) {
-			pending.add(m);
+			pending.get(host).add(m);
+			numPending.incrementAndGet();
 		}
 	}
 
 	public void deliverPending() {
 		boolean oneWasDelivered = true;
-		LinkedList<CausalMessage> toRemove = new LinkedList<>();
 
 		while (oneWasDelivered) {
 			oneWasDelivered = false;
 
-
 			synchronized (pending) {
-				Iterator<CausalMessage> i = pending.iterator(); // Must be in the synchronized block
+				Iterator<Host> i = pending.keySet().iterator();
 				while (i.hasNext()) {
-					CausalMessage causalMessage = i.next();
-					int[] vcm = causalMessage.getVc();
-					if (matchRequirements(vcm)) {
-						oneWasDelivered = true;
-						int id = causalMessage.getSource().getId();
-						vc.set(id, id + 1);
-						toRemove.add(causalMessage);
+					Host host = i.next();
 
+					CausalMessage cm;
+					int[] vcm;
+					while ((cm = pending.get(host).peek()) != null && matchRequirements(cm.getVc())) {
+						oneWasDelivered = true;
+						numPending.decrementAndGet();
+						vcm = cm.getVc();
+						cm = pending.get(host).poll();
+						int id = cm.getSource().getId();
+						vc.set(id, vc.get(id) + 1);
 						// log
-						log.add("d " + id + " " + causalMessage.getMessage() + "\n");
-						if (causalMessage.getSource().equals(me)) {
+						log.add("d " + id + " " + cm.getMessage() + "\n");
+						if (cm.getSource().equals(me)) {
 							broadcastSent.remove(vcm[me.getId()]);
 						}
-
-						deliver(causalMessage.getSource(), causalMessage.getMessage());
+						deliver(cm.getSource(), cm.getMessage());
 					}
 				}
-
-				pending.removeAll(toRemove);
-				toRemove.clear();
 			}
 		}
 
@@ -135,13 +149,15 @@ public class LCLayer implements Layer {
 	}
 
 	public String waitFinishBroadcasting(boolean retString) {
-		while (broadcastSent.size() > 0) {
+		while (broadcastSent.size() > 0 || numPending.get() > 0) {
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
+
+		// printPending();
 
 		if (retString) {
 			return log.stream().collect(Collectors.joining(""));
@@ -172,7 +188,7 @@ public class LCLayer implements Layer {
 			int value = vc.get(hId);
 			if (hId == me.getId())
 				value = num_sent;
-			
+
 			s += hId;
 			s += ":";
 			s += value;
