@@ -1,7 +1,7 @@
-./run.sh --id 1 --hosts ../host --barrier localhost:10000 --signal localhost:11000 --output test1.out
+./run.sh --id 1 --hosts ../host --barrier localhost:10000 --signal localhost:11000 --output test1.out ../config
 
-./run.sh --id 2 --hosts ../host --barrier localhost:10000 --signal localhost:11000 --output test2.out
-./run.sh --id 3 --hosts ../host --barrier localhost:10000 --signal localhost:11000 --output test3.out
+./run.sh --id 2 --hosts ../host --barrier localhost:10000 --signal localhost:11000 --output test2.out ../config
+./run.sh --id 3 --hosts ../host --barrier localhost:10000 --signal localhost:11000 --output test3.out ../config
 
 ./finishedSignal.py --processes 3
 

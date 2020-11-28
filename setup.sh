@@ -50,11 +50,11 @@ tmux select-pane -t 2
 tmux send-keys "tc qdisc add dev lo root netem 2>/dev/null" C-m
 tmux send-keys "tc qdisc change dev lo root netem delay 200ms 50ms distribution normal loss 10% 25% reorder 25% 50%"
 tmux select-pane -t 3
-tmux send-keys "./run.sh --id 1 --hosts ../host --barrier localhost:10000 --signal localhost:11000 --output test1.out"
+tmux send-keys "./run.sh --id 1 --hosts ../host --barrier localhost:10000 --signal localhost:11000 --output test1.out ../config"
 tmux select-pane -t 4
-tmux send-keys "./run.sh --id 2 --hosts ../host --barrier localhost:10000 --signal localhost:11000 --output test2.out"
+tmux send-keys "./run.sh --id 2 --hosts ../host --barrier localhost:10000 --signal localhost:11000 --output test2.out ../config"
 tmux select-pane -t 5
-tmux send-keys "./run.sh --id 3 --hosts ../host --barrier localhost:10000 --signal localhost:11000 --output test3.out"
+tmux send-keys "./run.sh --id 3 --hosts ../host --barrier localhost:10000 --signal localhost:11000 --output test3.out ../config"
 
 tmux select-layout tiled
 # tmux select-layout even-horizontal
