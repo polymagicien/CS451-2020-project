@@ -27,6 +27,11 @@ public class CausalMessage {
     }
 
     @Override
+    public String toString() {
+        return source.getId() + "-" + message + "-" + Arrays.toString(vc);
+    }
+
+    @Override
     public int hashCode() {
         return this.source.hashCode() + 7 * this.message.hashCode() + 29 * this.vc.hashCode();
     }
