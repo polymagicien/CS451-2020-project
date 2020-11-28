@@ -25,6 +25,10 @@ public class BebLayer implements Layer {
     }
 
     public void receive(Host host, String message) {
+        this.deliver(host, message);
+    }
+
+    public void deliver(Host host, String message) {
         if (upperLayer != null) {
             upperLayer.receive(host, message);
         }

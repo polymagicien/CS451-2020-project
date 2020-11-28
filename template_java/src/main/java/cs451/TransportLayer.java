@@ -29,7 +29,7 @@ public class TransportLayer implements Layer {
     }
 
     public void deliverTo(Layer layer) {
-        this.upperLayer = layer; 
+        this.upperLayer = layer;
     }
 
     public void receive(Host sourceHost, String rcvdPayload) {
@@ -45,18 +45,20 @@ public class TransportLayer implements Layer {
         String rcvdData = parser.getData();
         if (Constants.ACK.equals(rcvdData)) {
             acknowledged.add(packetId);
-        }
-        else {
+        } else {
             sendAck(sourceHost, parser.getSequenceNumber());
             if (!delivered.contains(packetId)) {
                 delivered.add(packetId);
-                if (upperLayer != null){
-                    upperLayer.receive(sourceHost, rcvdData);
-                }
-                else{
-                    System.out.print("Transport : " + parser + "\n");
-                }
+                deliver(sourceHost, rcvdData);
             }
+        }
+    }
+
+    public void deliver(Host host, String message) {
+        if (upperLayer != null) {
+            upperLayer.receive(host, message);
+        } else {
+            System.out.print("Transport : " + host + "-" + message + "\n");
         }
     }
 
@@ -68,7 +70,7 @@ public class TransportLayer implements Layer {
         senderManager.schedule(destHost, rawPayload, packetId);
     }
 
-    public void sendAck(Host destHost, long sequenceNumber){
+    public void sendAck(Host destHost, long sequenceNumber) {
         String rawPayload = sequenceNumber + ";" + Constants.ACK;
         GroundLayer.send(destHost, rawPayload);
     }
@@ -77,12 +79,11 @@ public class TransportLayer implements Layer {
         senderManager.cancelMessageTo(crashedHost);
     }
 
-
     class SenderManager {
         private Timer timer;
         private Map<Host, List<TimerTask>> hostToTasks;
         private Set<Host> cancelled;
-        
+
         public SenderManager() {
             this.timer = new Timer();
             this.hostToTasks = Collections.synchronizedMap(new HashMap<>());
@@ -91,16 +92,16 @@ public class TransportLayer implements Layer {
 
         public void schedule(Host destHost, String payload, PacketIdentifier packetId) {
             // Define new task
-            TimerTask task = new TimerTask() { 
+            TimerTask task = new TimerTask() {
                 @Override
                 public void run() {
-                    
+
                     if (cancelled.contains(destHost) && hostToTasks.containsKey(destHost)) {
                         List<TimerTask> listTask = hostToTasks.get(destHost);
 
                         synchronized (listTask) {
                             Iterator<TimerTask> i = listTask.iterator(); // Must be in synchronized block
-                            while (i.hasNext()){
+                            while (i.hasNext()) {
                                 TimerTask t = i.next();
                                 if (t != null)
                                     t.cancel();
@@ -113,22 +114,21 @@ public class TransportLayer implements Layer {
                         this.cancel();
                         List<TimerTask> listTask = hostToTasks.get(destHost);
                         listTask.remove(this);
-                    }
-                    else{
+                    } else {
                         GroundLayer.send(destHost, payload);
                     }
-				}
+                }
             };
 
-            if(!this.hostToTasks.containsKey(destHost)) {
+            if (!this.hostToTasks.containsKey(destHost)) {
                 this.hostToTasks.put(destHost, Collections.synchronizedList(new LinkedList<TimerTask>()));
             }
             this.hostToTasks.get(destHost).add(task);
 
-			this.timer.scheduleAtFixedRate(task, 0, Constants.DELAY_RETRANSMIT);
+            this.timer.scheduleAtFixedRate(task, 0, Constants.DELAY_RETRANSMIT);
         }
-        
-        public void cancelMessageTo(Host host){
+
+        public void cancelMessageTo(Host host) {
             cancelled.add(host);
         }
     }

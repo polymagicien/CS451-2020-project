@@ -30,6 +30,10 @@ public class ApplicationLayer implements Layer {
         System.err.println("Incorrect use of ApplicationLayer");
     }
 
+    public void deliver(Host host, String message) {
+        System.err.println("Not supported");
+    }
+
     public void handleCrash(Host crashedHost) {
         lowerLayer.handleCrash(crashedHost);
     }
