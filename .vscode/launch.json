@@ -9,8 +9,8 @@
             "type": "python",
             "request": "launch",
             "program": "validate.py",
-            "args" : ["-r", "template_java/run.sh", "-b", "fifo", "-l", "logs/", "-p", "3", "-m", "100"],
-            // ./validate.py -r template_java/run.sh -b fifo -l logs/ -p 3 -m 10
+            "args" : ["-r", "template_java/run.sh", "-b", "lcausal", "-l", "logs/", "-p", "3", "-m", "100"],
+            // ./validate.py -r template_java/run.sh -b lcausal -l logs/ -p 3 -m 10
             "console": "integratedTerminal"
         },
         {
